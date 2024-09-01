@@ -1,0 +1,99 @@
+body {
+    background-color: #f4f7f6;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.gm-avatar {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.gm-avatar i {
+    font-size: 100px;
+    color: #3498db; 
+}
+
+
+#gm-login-form {
+    background-color: #2c3e50;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+#gm-login-form h2 {
+    color: #ecf0f1;
+    margin-bottom: 30px;
+}
+
+#gm-login-form p {
+    margin-bottom: 20px;
+}
+
+#gm-login-form label {
+    color: #ecf0f1;
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+#gm-login-form input[type="text"],
+#gm-login-form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #34495e;
+    color: #ecf0f1;
+}
+
+#gm-login-form input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+#gm-login-form input[type="submit"] {
+    background-color: #1abc9c;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#gm-login-form input[type="submit"]:hover {
+    background-color: #16a085;
+}
+
+.gm-error {
+    color: #e74c3c;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+#gm-login-form .remember-forgot-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    color: #ecf0f1;
+}
+
+#gm-login-form .remember-forgot-container a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+#gm-login-form .remember-forgot-container a:hover {
+    text-decoration: underline;
+}

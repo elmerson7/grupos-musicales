@@ -1,0 +1,174 @@
+/* Estilos generales para el calendario */
+#contractor-calendar {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+#calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+#calendar-header span {
+    cursor: pointer;
+    font-size: 18px;
+}
+
+#calendar-filters {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    background-color: #e0e0e0;
+}
+#lblArea {
+    margin: 0 0 0 10px;
+}
+
+#calendar-filters select {
+    padding: 5px;
+    border-radius: 4px;
+    border: none;
+    background-color: #fff;
+    font-size: 14px;
+}
+
+#calendar-days {
+    display: flex;
+    justify-content: space-between;
+    background-color: #ddd;
+    padding: 10px;
+    font-weight: bold;
+}
+
+#calendar-days span {
+    flex: 1;
+    text-align: center;
+}
+
+#calendar-dates {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px;
+}
+
+.calendar-date {
+    flex: 1 0 14%;
+    text-align: center;
+    padding: 15px 5px;
+    box-sizing: border-box;
+    margin: 5px 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.calendar-date:hover {
+    background-color: #f1f1f1;
+}
+
+.calendar-date.available {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.calendar-date.contracted {
+    background-color: #9C27B0;
+    color: white;
+}
+
+.calendar-date.empty {
+    visibility: hidden;
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    min-width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.popup-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    text-align: center;
+}
+
+.popup-content h2 {
+    margin-top: 0;
+    font-size: 1.5em;
+    color: #333;
+}
+
+.close-popup {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-popup:hover,
+.close-popup:focus {
+    color: black;
+    text-decoration: none;
+}
+
+.contract-button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.contract-button:hover {
+    background-color: #45a049;
+}
+
+.availability-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: left;
+}
+
+.availability-item.contracted {
+    background-color: #e1bee7;
+}
+
+.availability-item p {
+    margin: 5px 0;
+}

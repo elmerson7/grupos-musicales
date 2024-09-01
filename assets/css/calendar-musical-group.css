@@ -1,0 +1,243 @@
+#musical-group-calendar {
+    max-width: 600px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+}
+
+#calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 5px 5px 0 0;
+}
+
+#calendar-header span {
+    cursor: pointer;
+}
+
+#calendar-month-year {
+    font-size: 1.2em;
+}
+
+#availability-filter {
+    margin: 10px 0;
+    padding: 5px;
+    font-size: 1em;
+}
+
+#calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background-color: #f0f0f0;
+    padding: 10px;
+    text-align: center;
+}
+
+#calendar-days span {
+    font-weight: bold;
+    color: #555;
+}
+
+#calendar-dates {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-date {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.calendar-date:hover {
+    background-color: #f0f0f0;
+}
+
+.calendar-date.available {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.calendar-date.contracted {
+    background-color: #9C27B0;
+    color: white;
+}
+
+.calendar-date.mixed {
+    background-color: #FF9800;
+    color: white;
+}
+
+.calendar-date.empty {
+    background-color: #fff;
+    cursor: default;
+}
+
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    min-width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 80%;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.close-popup {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+/* styles popup table availables */
+
+#add-availability-container {
+    text-align: center;
+    margin-top: 10px;
+}
+
+#add-availability {
+    color: green;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.availability-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.availability-table th,
+.availability-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.availability-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.availability-table td {
+    background-color: #fff;
+}
+
+.availability-table button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.availability-table button .fas {
+    color: #555;
+}
+
+.availability-table button:hover .fas {
+    color: #000;
+}
+
+/* Agrega los nuevos estilos aquí para el formulario de disponibilidades */
+#gm-availability-form {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: 20px auto;
+    font-family: Arial, sans-serif;
+}
+
+#gm-availability-form input[type="text"],
+#gm-availability-form input[type="time"],
+#gm-availability-form input[type="date"] {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+#gm-availability-form input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+#gm-availability-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+#gm-availability-form input[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease;
+}
+
+#gm-availability-form input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+#gm-availability-form .checkbox-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+#gm-availability-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.gm-error, .gm-success {
+    text-align: center;
+    padding: 10px;
+    margin-top: 15px;
+    border-radius: 4px;
+}
+
+.gm-error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.gm-success {
+    background-color: #d4edda;
+    color: #155724;
+}
