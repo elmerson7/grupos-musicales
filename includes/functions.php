@@ -518,20 +518,28 @@ function gm_get_contractor_availabilities_ajax() {
 add_action('wp_ajax_gm_get_contractor_availabilities', 'gm_get_contractor_availabilities_ajax');
 add_action('wp_ajax_nopriv_gm_get_contractor_availabilities', 'gm_get_contractor_availabilities_ajax');
 
-function enviar_correo_prueba() {
-    $to = 'elmerson_350@hotmail.com'; // Cambia a tu dirección de correo electrónico
-    $subject = 'Correo de Prueba desde WordPress';
-    $message = 'Este es un correo de prueba enviado desde WordPress usando la función wp_mail.';
-    $headers = array('Content-Type: text/html; charset=UTF-8');
+function gm_filter_block_navigation($block_content, $block) {
+    if ($block['blockName'] === 'core/navigation') {
+        if (is_user_logged_in()) {
+            $current_user = wp_get_current_user();
 
-    $enviado = wp_mail($to, $subject, $message, $headers);
+            $pages_to_hide = ['pagina-de-login', 'pagina-de-registro'];
 
-    if ($enviado) {
-        echo 'Correo enviado correctamente!';
-    } else {
-        echo 'Hubo un error al enviar el correo.';
+            foreach ($pages_to_hide as $slug) {
+                $block_content = preg_replace('/<li[^>]*>\s*<a[^>]*href="[^"]*\/' . preg_quote($slug, '/') . '[^"]*".*?<\/a>.*?<\/li>/is', '', $block_content);
+            }
+
+            if (in_array('gm_contractor', $current_user->roles)) {
+                $pages_to_hide_contractor = ['formulario-de-disponibilidades', 'perfil-grupo-musical'];
+
+                foreach ($pages_to_hide_contractor as $slug) {
+                    $block_content = preg_replace('/<li[^>]*>\s*<a[^>]*href="[^"]*\/' . preg_quote($slug, '/') . '[^"]*".*?<\/a>.*?<\/li>/is', '', $block_content);
+                }
+            }
+        }
     }
+    return $block_content;
 }
 
-// Remover la condición de is_admin()
-// add_action('init', 'enviar_correo_prueba');
+add_filter('render_block', 'gm_filter_block_navigation', 10, 2);
+

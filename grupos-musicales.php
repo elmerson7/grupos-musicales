@@ -43,7 +43,7 @@ function gm_create_pages() {
     // Crear página de perfil del grupo musical
     if (!get_page_by_path('perfil-grupo-musical')) {
         wp_insert_post(array(
-            'post_title'    => 'Grupos Musicales - Perfil del Grupo Musical',
+            'post_title'    => 'Perfil del Grupo Musical',
             'post_name'     => 'perfil-grupo-musical',
             'post_content'  => '[gm_group_profile_form]',
             'post_status'   => 'publish',
@@ -54,7 +54,7 @@ function gm_create_pages() {
     // Crear página de formulario de disponibilidades
     if (!get_page_by_path('formulario-de-disponibilidades')) {
         wp_insert_post(array(
-            'post_title'    => 'Grupos Musicales - Formulario de Disponibilidades',
+            'post_title'    => 'Formulario de Disponibilidades',
             'post_name'     => 'formulario-de-disponibilidades',
             'post_content'  => '[gm_availability_form]',
             'post_status'   => 'publish',
@@ -65,7 +65,7 @@ function gm_create_pages() {
     // Crear página de calendario de disponibilidades
     if (!get_page_by_path('calendario-de-disponibilidades')) {
         wp_insert_post(array(
-            'post_title'    => 'Grupos Musicales - Calendario de Disponibilidad',
+            'post_title'    => 'Calendario de Disponibilidad',
             'post_name'     => 'calendario-de-disponibilidades',
             'post_content'  => '[gm_availability_calendar][gm_contractor_calendar]',
             'post_status'   => 'publish',
