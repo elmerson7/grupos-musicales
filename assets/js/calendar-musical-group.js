@@ -1,12 +1,12 @@
 document.addEventListener('DOMContentLoaded', function() {
     const calendarDates = document.getElementById('calendar-dates');
     const calendarMonthYear = document.getElementById('calendar-month-year');
-    const prevMonth = document.getElementById('prev-month');
-    const nextMonth = document.getElementById('next-month');
+    const prevMonth = document.getElementById('prev-monthGM');
+    const nextMonth = document.getElementById('next-monthGM');
     const popup = document.getElementById('availability-popup');
     const popupContent = document.getElementById('popup-content');
     const closePopup = document.querySelector('.close-popup');
-    const availabilityFilter = document.getElementById('availability-filter');
+    const availabilityFilter = document.getElementById('availability-filterGM');
 
     let currentDate = new Date();
     let availabilities = [];
@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     availabilityFilter.addEventListener('change', loadCalendar);
 
-
     // funcion para mostrar el popup en el calendario de grupos musicales
     function showPopup(year, month, date, dayAvailabilities) {
         const selectedDate = new Date(year, month, date);
@@ -45,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <table class="availability-table">
                     <thead>
                         <tr>
-                            <th>Grupo Musical</th>
                             <th>Inicio</th>
                             <th>Fin</th>
                             <th>Acciones</th>
@@ -54,7 +52,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <tbody>
                         ${dayAvailabilities.map(availability => `
                             <tr>
-                                <td>${availability.group_name}</td>
                                 <td>${new Date(availability.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                                 <td>${new Date(availability.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                                 <td>
@@ -86,6 +83,25 @@ document.addEventListener('DOMContentLoaded', function() {
                         popupContent.innerHTML = `<h3>Crear Disponibilidad para ${selectedDate.toLocaleDateString()}</h3>`;
                         popupContent.innerHTML += response.data;
                         const availabilityForm = document.getElementById('gm-availability-form');
+                        
+                        let btnAllDay = document.getElementById('all_day');
+                        let startTime = document.getElementById('start_time');
+                        let endTime = document.getElementById('end_time');
+
+                        btnAllDay.addEventListener('change', function(){
+                            if(this.checked){
+                                startTime.value = '00:00';
+                                endTime.value = '23:59';
+                                startTime.disabled = true;
+                                endTime.disabled = true;
+                            }else{
+                                startTime.value = '';
+                                endTime.value = '';
+                                startTime.disabled = false;
+                                endTime.disabled = false;
+                            }
+                        });
+
                         if (availabilityForm) {
                             availabilityForm.addEventListener('submit', handleFormSubmit);
                         }
@@ -108,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Añadir el evento al botón de añadir disponibilidad
         const addAvailabilityButton = document.getElementById('add-availability');
+
         if (addAvailabilityButton) {
             addAvailabilityButton.addEventListener('click', () => {
                 jQuery.post(
@@ -121,6 +138,26 @@ document.addEventListener('DOMContentLoaded', function() {
                             popupContent.innerHTML += `<h4>Crear Nueva Disponibilidad para ${selectedDate.toLocaleDateString()}</h4>`;
                             popupContent.innerHTML += response.data;
                             const availabilityForm = document.getElementById('gm-availability-form');
+                            
+                            let btnAllDay = document.getElementById('all_day');
+                            let startTime = document.getElementById('start_time');
+                            let endTime = document.getElementById('end_time');
+
+                            btnAllDay.addEventListener('change', function(){
+                                if(this.checked){
+                                    startTime.value = '00:00';
+                                    endTime.value = '23:59';
+                                    startTime.disabled = true;
+                                    endTime.disabled = true;
+                                }else{
+                                    startTime.value = '';
+                                    endTime.value = '';
+                                    startTime.disabled = false;
+                                    endTime.disabled = false;
+                                }
+                            });
+
+
                             if (availabilityForm) {
                                 availabilityForm.addEventListener('submit', handleFormSubmit);
                             }
@@ -192,7 +229,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
 
     function loadCalendar() {
         const year = currentDate.getFullYear();
@@ -250,7 +286,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
     function getDayAvailabilities(year, month, date, filter) {
         return availabilities.filter(availability => {
             const availabilityDate = new Date(availability.date);
@@ -270,8 +305,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function handleFormSubmit(event) {
         event.preventDefault();
+        let btnAllDay = document.getElementById('all_day');
+        let startTime = document.getElementById('start_time');
+        let endTime = document.getElementById('end_time');
 
         const formData = new FormData(event.target);
+        
+        if(btnAllDay.checked){
+            // let dates = `&start_time=${startTime.value}&end_time=${endTime.value}`;
+            formData.append('start_time',startTime.value);
+            formData.append('end_time',endTime.value);
+        }
+        // formData.forEach((value,key) => {
+        //     console.log(key+' => '+value);
+        // });
+        // return console.log(formData);
         const data = Object.fromEntries(formData.entries());
 
         jQuery.post(
@@ -287,7 +335,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         );
     }
-
 
     closePopup.addEventListener('click', () => {
         popup.style.display = 'none';

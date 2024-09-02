@@ -10,8 +10,8 @@ $gm_availability_nonce = wp_create_nonce('gm_availability_action');
 
 <div id="musical-group-calendar">
     <div>
-        <label for="availability-filter">Mostrar:</label>
-        <select id="availability-filter">
+        <label for="availability-filterGM">Mostrar:</label>
+        <select id="availability-filterGM">
             <option value="all">Todas</option>
             <option value="available">Disponibles</option>
             <option value="contracted">Contratadas</option>
@@ -19,9 +19,9 @@ $gm_availability_nonce = wp_create_nonce('gm_availability_action');
     </div>
 
     <div id="calendar-header">
-        <span id="prev-month" role="button" tabindex="0">‹</span>
+        <span id="prev-monthGM" role="button" tabindex="0">‹</span>
         <span id="calendar-month-year"></span>
-        <span id="next-month" role="button" tabindex="0">›</span>
+        <span id="next-monthGM" role="button" tabindex="0">›</span>
     </div>
     <div id="calendar-days">
         <span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sa</span><span>Do</span>
