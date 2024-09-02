@@ -404,11 +404,39 @@ function gm_handle_contract() {
                     ['id' => $availability_id]
                 );
 
-                $group_email = $wpdb->get_var($wpdb->prepare("SELECT email FROM {$wpdb->prefix}gm_groups WHERE id = %d", $availability->group_id));
+                $group = $wpdb->get_row($wpdb->prepare("SELECT name, email, phone FROM {$wpdb->prefix}gm_groups WHERE id = %d", $availability->group_id), ARRAY_A);
 
-                wp_mail($group_email, 'Nueva Contratación', 'Tu disponibilidad ha sido contratada por ' . $user_info->display_name . ' para el ' . $availability->date);
-                wp_mail($user_info->user_email, 'Confirmación de Contratación', 'Has contratado a ' . gm_get_group_name($availability->group_id) . ' para el ' . $availability->date);
-                wp_mail(get_option('admin_email'), 'Nueva Contratación', 'Contratación realizada por ' . $user_info->display_name . ' para ' . gm_get_group_name($availability->group_id) . ' el ' . $availability->date);
+                // Crear lista con información del contratista
+                $contractor_info_list = '<ul>';
+                $contractor_info_list .= '<li>Nombre: ' . esc_html($user_info->display_name) . '</li>';
+                $contractor_info_list .= '<li>Email: ' . esc_html($user_info->user_email) . '</li>';
+                // $contractor_info_list .= '<li>Teléfono: ' . esc_html(get_user_meta($user_info->ID, 'phone', true)) . '</li>';
+                $contractor_info_list .= '</ul>';
+                
+                // Crear lista con información del grupo
+                $group_info_list = '<ul>';
+                $group_info_list .= '<li>Nombre del Grupo: ' . esc_html($group['name']) . '</li>';
+                $group_info_list .= '<li>Email del Grupo: ' . esc_html($group['email']) . '</li>';
+                $group_info_list .= '<li>Teléfono del Grupo: ' . esc_html($group['phone']) . '</li>';
+                $group_info_list .= '</ul>';
+                
+                // Crear mensaje para el grupo con información del contratista
+                $message_for_group = 'Tu disponibilidad ha sido contratada para el ' . esc_html($availability->date) . '.<br>';
+                $message_for_group .= 'Información del contratista:<br>' . $contractor_info_list;
+                
+                // Crear mensaje para el contratista con información del grupo
+                $message_for_contractor = 'Has contratado a ' . esc_html($group['name']) . ' para el ' . esc_html($availability->date) . '.<br>';
+                $message_for_contractor .= 'Información del grupo contratado:<br>' . $group_info_list;
+                
+                // Crear mensaje para el administrador con información de ambos
+                $message_for_admin = 'Contratación realizada por ' . esc_html($user_info->display_name) . ' para el grupo ' . esc_html($group['name']) . ' el ' . esc_html($availability->date) . '.<br>';
+                $message_for_admin .= 'Información del contratista:<br>' . $contractor_info_list;
+                $message_for_admin .= 'Información del grupo:<br>' . $group_info_list;
+                
+                // Enviar correos
+                wp_mail($group['email'], 'Nueva Contratación', $message_for_group, ['Content-Type: text/html; charset=UTF-8']);
+                wp_mail($user_info->user_email, 'Confirmación de Contratación', $message_for_contractor, ['Content-Type: text/html; charset=UTF-8']);
+                wp_mail(get_option('admin_email'), 'Nueva Contratación', $message_for_admin, ['Content-Type: text/html; charset=UTF-8']);
 
                 wp_send_json_success(['message' => 'Contratación exitosa']);
             } else {
@@ -490,3 +518,20 @@ function gm_get_contractor_availabilities_ajax() {
 add_action('wp_ajax_gm_get_contractor_availabilities', 'gm_get_contractor_availabilities_ajax');
 add_action('wp_ajax_nopriv_gm_get_contractor_availabilities', 'gm_get_contractor_availabilities_ajax');
 
+function enviar_correo_prueba() {
+    $to = 'elmerson_350@hotmail.com'; // Cambia a tu dirección de correo electrónico
+    $subject = 'Correo de Prueba desde WordPress';
+    $message = 'Este es un correo de prueba enviado desde WordPress usando la función wp_mail.';
+    $headers = array('Content-Type: text/html; charset=UTF-8');
+
+    $enviado = wp_mail($to, $subject, $message, $headers);
+
+    if ($enviado) {
+        echo 'Correo enviado correctamente!';
+    } else {
+        echo 'Hubo un error al enviar el correo.';
+    }
+}
+
+// Remover la condición de is_admin()
+// add_action('init', 'enviar_correo_prueba');
