@@ -1,7 +1,8 @@
 <?php
 
 // Añadir menú "Disponibilidades" al panel de administración
-function gm_register_availabilities_menu() {
+function gm_register_menus() {
+    // Menú principal para "Disponibilidades"
     add_menu_page(
         'Disponibilidades',  // Título de la página
         'Disponibilidades',  // Título del menú
@@ -11,12 +12,47 @@ function gm_register_availabilities_menu() {
         'dashicons-calendar-alt', // Icono del menú
         6                     // Posición del menú
     );
-}
-add_action('admin_menu', 'gm_register_availabilities_menu');
 
+    // Menú principal para "Grupo Musical"
+    add_menu_page(
+        'Grupo Musical',          // Título de la página
+        'Grupo Musical',          // Título del menú
+        'manage_options',         // Capacidad requerida
+        'gm_grupo_musical',       // Slug de la página
+        'gm_grupo_musical_page',  // Función de contenido
+        'dashicons-groups',       // Icono del menú
+        7                         // Posición del menú
+    );
+
+    // Menú principal para "Contratante"
+    add_menu_page(
+        'Contratante',            // Título de la página
+        'Contratante',            // Título del menú
+        'manage_options',         // Capacidad requerida
+        'gm_contratante',         // Slug de la página
+        'gm_contratante_page',    // Función de contenido
+        'dashicons-businessman',  // Icono del menú
+        8                         // Posición del menú
+    );
+}
+
+add_action('admin_menu', 'gm_register_menus');
+
+// Función de contenido para "Disponibilidades"
 function gm_availabilities_page() {
     include plugin_dir_path(__FILE__) . '../templates/gm-availabilities-page.php';
 }
+
+// Función de contenido para "Grupo Musical"
+function gm_grupo_musical_page() {
+    include plugin_dir_path(__FILE__) . '../templates/gm-grupo-musical-page.php';
+}
+
+// Función de contenido para "Contratante"
+function gm_contratante_page() {
+    include plugin_dir_path(__FILE__) . '../templates/gm-contratante-page.php';
+}
+
 
 // Endpoint para crear una nueva disponibilidad
 function gm_availabilities_page_create_availability() {
@@ -131,6 +167,183 @@ function gm_availabilities_page_delete_availability() {
     }
 }
 add_action('wp_ajax_gm_availabilities_page_delete_availability', 'gm_availabilities_page_delete_availability');
+
+// Endpoint para crear un nuevo grupo
+function gm_groups_page_create_group() {
+    check_ajax_referer('gm_group_action', '_wpnonce');
+
+    if (
+        isset($_POST['username'], $_POST['email'], $_POST['password'], $_POST['name'], $_POST['description'], $_POST['zone'], $_POST['phone'], $_POST['email_contact']) && 
+        !empty($_FILES['photo'])
+    ) {
+        global $wpdb;
+
+        $username = sanitize_user($_POST['username']);
+        $email = sanitize_email($_POST['email']);
+        $password = sanitize_text_field($_POST['password']);
+        $name = sanitize_text_field($_POST['name']);
+        $description = sanitize_textarea_field($_POST['description']);
+        $zone = intval($_POST['zone']);
+        $phone = sanitize_text_field($_POST['phone']);
+        $email_contact = sanitize_email($_POST['email_contact']);
+        $role = 'gm_group';
+
+        // Verificar si el correo electrónico ya existe
+        if (email_exists($email)) {
+            wp_send_json_error('Lo siento, ¡esa dirección de correo electrónico ya está en uso!');
+            return;
+        }
+
+        $user_id = wp_create_user($username, $password, $email);
+        if (is_wp_error($user_id)) {
+            wp_send_json_error('Error al crear el usuario: ' . $user_id->get_error_message());
+            return;
+        }
+
+        $user = new WP_User($user_id);
+        $user->set_role($role);
+
+        // Manejar la carga de la fotografía
+        $upload = wp_handle_upload($_FILES['photo'], array('test_form' => false));
+        if (!$upload || isset($upload['error'])) {
+            wp_send_json_error('Error al cargar la fotografía: ' . $upload['error']);
+            return;
+        }
+
+        // Insertar grupo musical en la tabla personalizada
+        $result = $wpdb->insert(
+            "{$wpdb->prefix}gm_groups",
+            array(
+                'user_id' => $user_id,
+                'name' => $name,
+                'description' => $description,
+                'id_zone' => $zone,
+                'phone' => $phone,
+                'email' => $email_contact,
+                'photo' => $upload['url']
+            )
+        );
+
+        if ($result === false) {
+            wp_send_json_error('Error al crear el grupo musical.');
+        } else {
+            wp_send_json_success('Grupo creado exitosamente.');
+        }
+    } else {
+        wp_send_json_error('Faltan datos necesarios para crear el grupo.');
+    }
+}
+add_action('wp_ajax_gm_groups_page_create_group', 'gm_groups_page_create_group');
+
+// Endpoint para obtener los datos de un grupo en la página de grupos
+function gm_groups_page_get_group() {
+    check_ajax_referer('gm_group_action', '_wpnonce');
+
+    if (isset($_POST['group_id'])) {
+        global $wpdb;
+        $group_id = intval($_POST['group_id']);
+        $group = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gm_groups WHERE id = %d", $group_id));
+        if ($group) {
+            wp_send_json_success($group);
+        } else {
+            wp_send_json_error('Grupo no encontrada.');
+        }
+    }
+    wp_send_json_error('ID de grupo no especificado.');
+}
+add_action('wp_ajax_gm_groups_page_get_group', 'gm_groups_page_get_group');
+
+// Endpoint para actualizar una disponibilidad en la página de disponibilidades
+function gm_groups_page_update_group() {
+    check_ajax_referer('gm_group_action', '_wpnonce');
+
+    if (isset($_POST['group_id'])) {
+        global $wpdb;
+
+        // Obtener y sanitizar los datos del formulario
+        $group_id = intval($_POST['group_id']);
+        $name = sanitize_text_field($_POST['name']);
+        $description = sanitize_textarea_field($_POST['description']);
+        $zone = intval($_POST['zone']);
+        $phone = sanitize_text_field($_POST['phone']);
+        $email_contact = sanitize_email($_POST['email_contact']);
+
+        // Manejar la carga de la fotografía si se ha proporcionado una nueva
+        $photo_url = '';
+        if (!empty($_FILES['photo']['name'])) {
+            $upload = wp_handle_upload($_FILES['photo'], array('test_form' => false));
+            if (!$upload || isset($upload['error'])) {
+                wp_send_json_error('Error al cargar la fotografía: ' . $upload['error']);
+                return;
+            }
+            $photo_url = $upload['url'];
+        }
+
+        // Preparar los datos para la actualización
+        $data = [
+            'name' => $name,
+            'description' => $description,
+            'id_zone' => $zone,
+            'phone' => $phone,
+            'email' => $email_contact,
+        ];
+
+        // Si hay una nueva fotografía, incluirla en los datos de actualización
+        if ($photo_url) {
+            $data['photo'] = $photo_url;
+        }
+
+        // Realizar la actualización en la base de datos
+        $updated = $wpdb->update(
+            "{$wpdb->prefix}gm_groups",
+            $data,
+            ['id' => $group_id]
+        );
+
+        if ($updated !== false) {
+            wp_send_json_success('Grupo actualizado correctamente.');
+        } else {
+            wp_send_json_error('Error al actualizar el grupo: ' . $wpdb->last_error);
+        }
+    } else {
+        wp_send_json_error('Datos del grupo no recibidos correctamente.');
+    }
+}
+add_action('wp_ajax_gm_groups_page_update_group', 'gm_groups_page_update_group');
+
+
+// Función para eliminar un grupo
+function gm_groups_page_delete_group() {
+    if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'gm_group_action')) {
+        wp_send_json_error('Nonce verification failed');
+        return;
+    }
+
+    if (isset($_POST['groupId'])) {
+        global $wpdb;
+
+        $group_id = intval($_POST['groupId']);
+
+        $group = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gm_groups WHERE id = %d", $group_id));
+
+        if ($group) {
+            $result = $wpdb->delete("{$wpdb->prefix}gm_groups", ['id' => $group_id]);
+
+            if ($result) {
+                wp_delete_user($group->user_id);
+
+                wp_send_json_success('Grupo eliminado exitosamente');
+            } else {
+                wp_send_json_error('Error al eliminar el grupo: ' . $wpdb->last_error);
+            }
+        } else {
+            wp_send_json_error('El grupo no existe.');
+        }
+    } else {
+        wp_send_json_error('Datos no recibidos correctamente.');
+    }
+}
+add_action('wp_ajax_gm_groups_page_delete_group', 'gm_groups_page_delete_group');
 
 
 function gm_create_tables() {

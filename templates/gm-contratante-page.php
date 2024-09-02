@@ -116,7 +116,7 @@ $gm_availability_nonce = wp_create_nonce('gm_availability_action');
     jQuery(document).ready(function($) {
         $('#myTableAvailable').DataTable({
             "language": {
-                "url": "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+                "url": "//cdn.datatables.net/plug-ins/1.13.1/i18n/Spanish.json"
             }
         });
     });
