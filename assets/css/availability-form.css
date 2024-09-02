@@ -91,3 +91,53 @@ input[type="submit"]:hover {
 .availabilitiDiv{
     display: flex;
 }
+
+#listaEventos{
+    display:flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.radio-group label {
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.radio-group input[type="radio"] {
+    accent-color: #9c27b0; /* Color del círculo del radio button */
+}
+
+.radio-group input[type="radio"]:checked + label {
+    color: #dadd11;
+}
+
+.radio-group label:hover {
+    color: #d7b3dd;
+}
+#divFechaFin{
+    display: none;
+}
+
+#contenedor-eventos{
+    background-color: #9d4bac81;
+    padding: 10px 8px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+
+#contentEvent{
+    display:none;
+    justify-content: center;
+    align-items: center;
+}
+
+#cancelEvent{
+    width: 50%;
+    padding: 5px;
+    background-color: #f1f0f1; /* Color morado */
+    color: #b754bb;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 17px;
+}

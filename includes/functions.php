@@ -229,6 +229,8 @@ function gm_handle_availability_ajax() {
     $end_time = sanitize_text_field($_POST['end_time']);
     $all_day = isset($_POST['all_day']) ? 1 : 0;
     $user_id = get_current_user_id();
+    $event = isset($_POST['event']) ? sanitize_text_field($_POST['event']) : 0;
+    $endDate = sanitize_text_field($_POST['endDate']) ? sanitize_text_field($_POST['endDate']) : null;
 
     $group_id = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$wpdb->prefix}gm_groups WHERE user_id = %d", $user_id));
 
@@ -237,21 +239,66 @@ function gm_handle_availability_ajax() {
         return;
     }
 
-    $data = [
-        'group_id' => $group_id,
-        'date' => $date . ' ' . $start_time,
-        'end_time' => $date . ' ' . $end_time,
-        'all_day' => $all_day
-    ];
+    if ($event != 0) {
+        // Convertir las fechas a objetos DateTime para poder manipularlas
+        $startDateTime = new DateTime($date . ' ' . $start_time);
+        $endDateTime = new DateTime($date . ' ' . $end_time);
+        $finalEndDate = new DateTime($endDate);
 
-    $result = $wpdb->insert("{$wpdb->prefix}gm_availabilities", $data);
+        $interval = null;
 
-    if ($result === false) {
-        wp_send_json_error("Error en el registro: No se pudo insertar la disponibilidad en la base de datos.");
-    } else {
-        wp_send_json_success("Inserción exitosa en la tabla gm_availabilities.");
+        // Determinar el intervalo en función del tipo de evento
+        switch ($event) {
+            case 'diario':
+                $interval = new DateInterval('P1D'); // 1 día
+                break;
+            case 'semanal':
+                $interval = new DateInterval('P7D'); // 7 días
+                break;
+            case 'mensual':
+                $interval = new DateInterval('P30D'); // 30 días
+                break;
+            default:
+                $interval = null;
+                break;
+        }
+
+        $period = new DatePeriod($startDateTime, $interval, $finalEndDate->modify('+1 day'));
+
+        foreach ($period as $dt) {
+            $data = [
+                'group_id' => $group_id,
+                'date' => $dt->format('Y-m-d H:i:s'),
+                'end_time' => $dt->format('Y-m-d') . ' ' . $end_time,
+                'all_day' => $all_day,
+            ];
+
+            $result = $wpdb->insert("{$wpdb->prefix}gm_availabilities", $data);
+
+            if ($result === false) {
+                wp_send_json_error("Error en el registro: No se pudo insertar la disponibilidad en la base de datos.");
+                return;
+            }
+        }
+    }else{
+        $data = [
+            'group_id' => $group_id,
+            'date' => $date . ' ' . $start_time,
+            'end_time' => $date . ' ' . $end_time,
+            'all_day' => $all_day,
+        ];
+        $result = $wpdb->insert("{$wpdb->prefix}gm_availabilities", $data);
+        if ($result === false) {
+            wp_send_json_error("Error en el registro: No se pudo insertar la disponibilidad en la base de datos.");
+        } else {
+            wp_send_json_success("Inserción exitosa en la tabla gm_availabilities.");
+        }
     }
+
+
+    wp_send_json_success("Inserción exitosa en la tabla gm_availabilities.");
 }
+
 
 add_action('wp_ajax_gm_handle_availability_ajax', 'gm_handle_availability_ajax');
 add_action('wp_ajax_nopriv_gm_handle_availability_ajax', 'gm_handle_availability_ajax');

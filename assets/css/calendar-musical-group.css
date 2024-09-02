@@ -94,6 +94,8 @@
 }
 
 .popup-content {
+    height: 100vh;
+    overflow: auto;
     background-color: white;
     padding: 20px;
     border-radius: 5px;

@@ -38,8 +38,36 @@
         <span id="end-time-error" class="gm-error">Este campo es obligatorio.</span>
         <span id="time-error" class="gm-error">La hora de inicio debe ser anterior a la hora de fin.</span>
     </div>
+
+    <div id="contenedor-eventos">
+        <div class="form-group">
+            <div class="radio-group" id="listaEventos">
+                <label for="daily">
+                    <input class="radioEvent" type="radio" id="daily" name="event" value="diario">
+                    Diario
+                </label>
+                <label for="weekly">
+                    <input class="radioEvent" type="radio" id="weekly" name="event" value="semanal">
+                    Semanal
+                </label>
+                <label for="monthly">
+                    <input class="radioEvent" type="radio" id="monthly" name="event" value="mensual">
+                    Mensual
+                </label>
+            </div>
+        </div>
     
-    
+        <div class="form-group" id="divFechaFin">
+            <label for="endDate">Fecha Fin</label>
+            <input type="date" name="endDate" id="endDate" disabled aria-describedby="date-error">
+            <span id="date-error" class="gm-error">Este campo es obligatorio.</span>
+        </div>
+        
+        <div class="form-group" id="contentEvent">
+            <input type="button" name="cancelEvent" id="cancelEvent" value="Cancelar Evento">
+        </div>
+    </div>
+
     <div class="form-group">
         <input type="submit" name="submit_availability" value="Guardar Disponibilidad">
     </div>
@@ -50,6 +78,36 @@
 let btnAllDay = document.getElementById('all_day');
 let startTime = document.getElementById('start_time');
 let endTime = document.getElementById('end_time');
+
+let divFechaFin = document.getElementById('divFechaFin');
+let cancelEvent = document.getElementById('cancelEvent');
+let radioButtons = document.querySelectorAll('.radioEvent');
+let endDate = document.getElementById('endDate');
+
+cancelEvent.addEventListener('click', function() {
+    radioButtons.forEach(function(radio) {
+        radio.checked = false;
+    });
+
+    if (divFechaFin) {
+        divFechaFin.style.display = 'none';
+        divFechaFin.value = '';
+    }
+    contentEvent.style.display = 'none';
+    endDate.removeAttribute('required');
+    endDate.setAttribute('disabled','disabled');
+    endDate.value = '';
+});
+
+document.querySelectorAll('.radioEvent').forEach(function(radio) {
+    radio.addEventListener('click', function() {
+        contentEvent.style.display = 'flex';
+        divFechaFin.style.display = 'block';
+        endDate.setAttribute('required','required');
+        endDate.removeAttribute('disabled');
+
+    });
+});
 
 btnAllDay.addEventListener('change', function(){
     if(this.checked){
@@ -67,6 +125,7 @@ btnAllDay.addEventListener('change', function(){
 
 
 jQuery(document).ready(function($) {
+    let divFechaFin = document.getElementById('divFechaFin');
     $('#gm-availability-form').submit(function(e) {
         e.preventDefault();
         
@@ -76,6 +135,8 @@ jQuery(document).ready(function($) {
             let dates = `&start_time=${startTime.value}&end_time=${endTime.value}`;
             formData += dates;
         }
+        
+        // return console.log(formData);
         
         $.ajax({
             url: '<?php echo admin_url('admin-ajax.php'); ?>',
