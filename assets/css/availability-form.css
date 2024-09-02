@@ -84,3 +84,10 @@ input[type="submit"]:hover {
     font-weight: bold;
     margin-top: 5px;
 }
+
+.inputAvailibility {
+    margin-bottom: 15px;
+}
+.availabilitiDiv{
+    display: flex;
+}
