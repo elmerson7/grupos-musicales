@@ -1,20 +1,13 @@
 <?php
 global $wpdb;
 
-// Obtener todas las disponibilidades junto con la información del grupo musical y las contrataciones
-$availabilities = $wpdb->get_results($wpdb->prepare("
-    SELECT a.*, g.name as group_name, c.contractor_name, name_area 
-    FROM {$wpdb->prefix}gm_availabilities a 
-    JOIN {$wpdb->prefix}gm_groups g ON a.group_id = g.id
-    LEFT JOIN {$wpdb->prefix}gm_contracts c ON a.id = c.availability_id
-    LEFT JOIN {$wpdb->prefix}areas d ON g.region = d.name_area WHERE d.status = 1
-"));
-$availabilities_json = json_encode($availabilities);
-$areas = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}areas WHERE status = 1"));
+$gm_contract_nonce = wp_create_nonce('gm_contract_action');
+
+$zones = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gm_zones WHERE status = 1");
 
 ?>
 
-<div id="contractor-calendar" data-availabilities='<?php echo esc_attr($availabilities_json); ?>'>
+<div id="contractor-calendar">
     <div id="calendar-header">
         <span id="prev-month" role="button" tabindex="0">‹</span>
         <span id="calendar-month-year"></span>
@@ -27,11 +20,11 @@ $areas = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}areas W
             <option value="available">Disponibles</option>
             <option value="contracted">Contratadas por mí</option>
         </select>
-        <label id="lblArea" for="area-filter">Area:</label>
-        <select id="area-filter">
+        <label id="lblArea" for="zone-filter">Zona:</label>
+        <select id="zone-filter">
             <option value="all">Todas</option>
-        <?php foreach ($areas as $area): ?>
-            <option value="<?=$area->name_area?>"><?=$area->name_area?></option>
+        <?php foreach ($zones as $zone): ?>
+            <option value="<?=$zone->id?>"><?=$zone->name_zone?></option>
         <?php endforeach; ?>
         </select>
     </div>
@@ -54,5 +47,6 @@ $areas = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}areas W
 <script>
     var ajaxurl = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>';
     var wp_current_user_name = '<?php echo esc_js(wp_get_current_user()->display_name); ?>';
+    var gm_contract_nonce = '<?php echo esc_attr($gm_contract_nonce); ?>';
 </script>
 <script src="<?php echo esc_url(plugin_dir_url(__FILE__) . '../assets/js/calendar-contractor.js'); ?>"></script>

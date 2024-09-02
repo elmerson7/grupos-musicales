@@ -42,7 +42,7 @@ function gm_handle_group_profile_form() {
 
         $name = sanitize_text_field($_POST['name']);
         $description = sanitize_textarea_field($_POST['description']);
-        $region = sanitize_text_field($_POST['region']);
+        $zone = intval($_POST['zone']);
         $phone = sanitize_text_field($_POST['phone']);
         $email = sanitize_email($_POST['email']);
         $photo = '';
@@ -59,7 +59,7 @@ function gm_handle_group_profile_form() {
             'photo' => $photo,
             'name' => $name,
             'description' => $description,
-            'region' => $region,
+            'id_zone' => $zone,
             'email' => $email,
             'phone' => $phone
         ];

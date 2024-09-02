@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_group_profile'
         echo '<div class="gm-error">Por favor, selecciona una imagen.</div>';
     }
 }
-$areas = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}areas WHERE status = 1"));
+$zones = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gm_zones WHERE status = 1"));
 ?>
 
 <form method="POST" action="" enctype="multipart/form-data" id="gm-group-profile-form">
@@ -75,14 +75,11 @@ $areas = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}areas W
             <textarea name="description" id="description" required></textarea>
         </div>
         <div class="form-group">
-            <!-- <label for="region">Zona geográfica</label>
-            <input type="text" name="region" id="region" required> -->
-
-            <label id="lblRegion" for="region">Zona geográfica</label>
-            <select name="region" id="region" require>
-            <option value="" selected disabled>--Selecciona Región--</option>
-            <?php foreach ($areas as $area): ?>
-                <option value="<?=$area->name_area?>"><?=$area->name_area?></option>
+            <label id="lblRegion" for="zone">Zona geográfica</label>
+            <select name="zone" id="zone" require>
+            <option value="" selected disabled>--Selecciona Zona--</option>
+            <?php foreach ($zones as $zone): ?>
+                <option value="<?=$zone->id?>"><?=$zone->name_zone?></option>
             <?php endforeach; ?>
             </select>
         </div>

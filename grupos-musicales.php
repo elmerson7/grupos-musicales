@@ -21,7 +21,7 @@ function gm_create_pages() {
     // Crear página de registro
     if (!get_page_by_path('pagina-de-registro')) {
         wp_insert_post(array(
-            'post_title'    => 'Grupos Musicales - Página de Registro',
+            'post_title'    => 'Página de Registro',
             'post_name'     => 'pagina-de-registro',
             'post_content'  => '[gm_registration_form]',
             'post_status'   => 'publish',
@@ -32,7 +32,7 @@ function gm_create_pages() {
     // Crear página de login
     if (!get_page_by_path('pagina-de-login')) {
         wp_insert_post(array(
-            'post_title'    => 'Grupos Musicales - Página de Login',
+            'post_title'    => 'Página de Login',
             'post_name'     => 'pagina-de-login',
             'post_content'  => '[gm_login_form]',
             'post_status'   => 'publish',

@@ -7,10 +7,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const popupContent = document.getElementById('popup-content');
     const closePopup = document.querySelector('.close-popup');
     const filterSelect = document.getElementById('availability-filter');
-    const areaSelect = document.getElementById('area-filter');
+    const zoneSelect = document.getElementById('zone-filter');
 
     let currentDate = new Date();
-    const availabilities = JSON.parse(document.getElementById('contractor-calendar').dataset.availabilities);
+    let availabilities = [];
+
+    // Función para cargar disponibilidades desde el servidor
+    function loadAvailabilities() {
+        jQuery.post(
+            ajaxurl,
+            {
+                action: 'gm_get_contractor_availabilities',
+                security: gm_contract_nonce
+            },
+            function(response) {
+                if (response.success) {
+                    availabilities = response.data;
+
+                    loadCalendar(); // Cargar el calendario con las disponibilidades obtenidas
+                } else {
+                    alert('Error al cargar disponibilidades: ' + response.data);
+                }
+            }
+        );
+    }
 
     function loadCalendar() {       
         const year = currentDate.getFullYear();
@@ -34,14 +54,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         const filter = filterSelect.value;
-        const area = areaSelect.value;
-        
+        const id_zone = zoneSelect.value;
+
         for (let date = 1; date <= lastDate; date++) {
             const dateCell = document.createElement('div');
             dateCell.classList.add('calendar-date');
             dateCell.textContent = date;
             
-            const dayAvailabilities = getDayAvailabilities(year, month, date, filter, area);
+            const dayAvailabilities = getDayAvailabilities(year, month, date, filter, id_zone);
             
             if (dayAvailabilities.length > 0) {
                 const isContracted = dayAvailabilities.some(a => a.contractor_name === wp_current_user_name);
@@ -62,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     }
 
-    function getDayAvailabilities(year, month, date, filter, area) {
+    function getDayAvailabilities(year, month, date, filter, id_zone) {
         return availabilities.filter(availability => {
             const availabilityDate = new Date(availability.date);
             const isContractedByMe = availability.contractor_name === wp_current_user_name;
@@ -72,22 +92,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 availabilityDate.getMonth() === month &&
                 availabilityDate.getDate() === date 
             ) {
+
                 if (filter === 'available' && !availability.contractor_name) {
-                    if (area === availability.name_area) {
+                    if (id_zone === availability.id_zone) {
                         return true;
-                    }else if(area === 'all'){
+                    }else if(id_zone === 'all'){
                         return true;
                     }
                 } else if (filter === 'contracted' && isContractedByMe) {
-                    if (area === availability.name_area) {
+                    if (id_zone === availability.id_zone) {
                         return true;
-                    }else if(area === 'all'){
+                    }else if(id_zone === 'all'){
                         return true;
                     }
                 } else if (filter === 'all') {
-                    if (area === availability.name_area) {
+                    if (id_zone === availability.id_zone) {
                         return true;
-                    }else if(area === 'all'){
+                    }else if(id_zone === 'all'){
                         return true;
                     }
                 }
@@ -106,11 +127,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 const contractButton = availability.contractor_name ? '' : `<button class="contract-button" data-availability-id="${availability.id}">Contratar</button>`;
                 popupContent.innerHTML += `
                     <div class="availability-item ${availability.contractor_name ? 'contracted' : ''}">
-                        <p><strong>Grupo Musical:</strong> ${availability.group_name}</p>
-                        <p><strong>Región:</strong> ${availability.name_area}</p>
-                        <p><strong>Inicio:</strong> ${new Date(availability.date).toLocaleTimeString()}</p>
-                        <p><strong>Fin:</strong> ${new Date(availability.end_time).toLocaleTimeString()}</p>
-                        ${contractButton}
+                        <div class="availability-header">
+                            <img src="${availability.photo}" alt="${availability.group_name}" class="availability-photo"/>
+                            <div class="availability-info">
+                                <p><strong>Grupo Musical:</strong> ${availability.group_name}</p>
+                                <p><strong>Descripción:</strong> ${availability.description}</p>
+                                <p><strong>Región:</strong> ${availability.name_zone}</p>
+                            </div>
+                        </div>
+                        <div class="availability-details"> <!-- Contenedor flexible -->
+                            <div class="availability-action">
+                                ${contractButton}
+                            </div>
+                            <div class="availability-time">
+                                <p><strong>Inicio:</strong> ${new Date(availability.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                <p><strong>Fin:</strong> ${new Date(availability.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                            </div>
+                        </div>
                     </div>
                 `;
             });
@@ -170,7 +203,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     filterSelect.addEventListener('change', loadCalendar);
-    areaSelect.addEventListener('change', loadCalendar);
+    zoneSelect.addEventListener('change', loadCalendar);
 
-    loadCalendar();
+    // loadCalendar();
+    loadAvailabilities();
 });

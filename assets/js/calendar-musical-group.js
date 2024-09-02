@@ -9,94 +9,72 @@ document.addEventListener('DOMContentLoaded', function() {
     const availabilityFilter = document.getElementById('availability-filter');
 
     let currentDate = new Date();
-    const availabilityData = document.getElementById('musical-group-calendar').dataset.availabilities;
-    if (!availabilityData) {
-        console.error('Data availabilities no encontrada');
-        return;
-    }
-    console.log('Disponibilidades:', availabilityData);
-    const availabilities = JSON.parse(availabilityData);
+    let availabilities = [];
 
-    availabilityFilter.addEventListener('change', loadCalendar);
-
-
- // funcion para mostrar el popup en el calendario de grupos musicales
- function showPopup(year, month, date, dayAvailabilities) {
-    const selectedDate = new Date(year, month, date);
-    popupContent.innerHTML = '';
-
-    if (dayAvailabilities.length > 0) {
-        // Crear la tabla de disponibilidades
-        popupContent.innerHTML = `<h3>Disponibilidades para ${selectedDate.toLocaleDateString()}</h3>`;
-        popupContent.innerHTML += `
-            <table class="availability-table">
-                <thead>
-                    <tr>
-                        <th>Grupo Musical</th>
-                        <th>Inicio</th>
-                        <th>Fin</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${dayAvailabilities.map(availability => `
-                        <tr>
-                            <td>${availability.group_name}</td>
-                            <td>${new Date(availability.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
-                            <td>${new Date(availability.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
-                            <td>
-                                <button class="edit-availability" data-id="${availability.id}">
-                                    <i class="fas fa-edit"></i> <!-- Icono de edición -->
-                                </button>
-                                <button class="delete-availability" data-id="${availability.id}">
-                                    <i class="fas fa-trash-alt"></i> <!-- Icono de eliminación -->
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-            <div id="add-availability-container" style="text-align: center; margin-top: 10px;">
-                <span id="add-availability" style="color: green; font-size: 30px; cursor: pointer;">+</span>
-            </div>
-        `;
-    } else {
-        // Cargar el formulario de disponibilidad si no hay ninguna
+    function loadAvailabilities() {
         jQuery.post(
             ajaxurl,
             {
-                action: 'gm_get_availability_form',
-                date: `${year}-${(month + 1).toString().padStart(2, '0')}-${date.toString().padStart(2, '0')}`
+                action: 'gm_get_availabilities',
+                security: gm_availability_nonce
             },
             function(response) {
                 if (response.success) {
-                    popupContent.innerHTML = `<h3>Crear Disponibilidad para ${selectedDate.toLocaleDateString()}</h3>`;
-                    popupContent.innerHTML += response.data;
-                    const availabilityForm = document.getElementById('gm-availability-form');
-                    if (availabilityForm) {
-                        availabilityForm.addEventListener('submit', handleFormSubmit);
-                    }
+                    availabilities = response.data;
+                    loadCalendar(); // Cargar el calendario con las disponibilidades obtenidas
                 } else {
-                    popupContent.innerHTML = `<p>${response.data}</p>`;
+                    alert('Error al cargar disponibilidades: ' + response.data);
                 }
             }
         );
     }
+    // const availabilities = JSON.parse(availabilityData);
 
-    popup.style.display = 'block';
+    availabilityFilter.addEventListener('change', loadCalendar);
 
-    document.querySelectorAll('.edit-availability').forEach(button => {
-        button.addEventListener('click', handleEditAvailability);
-    });
 
-    document.querySelectorAll('.delete-availability').forEach(button => {
-        button.addEventListener('click', handleDeleteAvailability);
-    });
+    // funcion para mostrar el popup en el calendario de grupos musicales
+    function showPopup(year, month, date, dayAvailabilities) {
+        const selectedDate = new Date(year, month, date);
+        popupContent.innerHTML = '';
 
-    // Añadir el evento al botón de añadir disponibilidad
-    const addAvailabilityButton = document.getElementById('add-availability');
-    if (addAvailabilityButton) {
-        addAvailabilityButton.addEventListener('click', () => {
+        if (dayAvailabilities.length > 0) {
+            // Crear la tabla de disponibilidades
+            popupContent.innerHTML = `<h3>Disponibilidades para ${selectedDate.toLocaleDateString()}</h3>`;
+            popupContent.innerHTML += `
+                <table class="availability-table">
+                    <thead>
+                        <tr>
+                            <th>Grupo Musical</th>
+                            <th>Inicio</th>
+                            <th>Fin</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${dayAvailabilities.map(availability => `
+                            <tr>
+                                <td>${availability.group_name}</td>
+                                <td>${new Date(availability.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                                <td>${new Date(availability.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                                <td>
+                                    <button class="edit-availability" data-id="${availability.id}">
+                                        <i class="fas fa-edit"></i> <!-- Icono de edición -->
+                                    </button>
+                                    <button class="delete-availability" data-id="${availability.id}">
+                                        <i class="fas fa-trash-alt"></i> <!-- Icono de eliminación -->
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <div id="add-availability-container" style="text-align: center; margin-top: 10px;">
+                    <span id="add-availability" style="color: green; font-size: 30px; cursor: pointer;">+</span>
+                </div>
+            `;
+        } else {
+            // Cargar el formulario de disponibilidad si no hay ninguna
             jQuery.post(
                 ajaxurl,
                 {
@@ -105,20 +83,55 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 function(response) {
                     if (response.success) {
-                        popupContent.innerHTML += `<h4>Crear Nueva Disponibilidad para ${selectedDate.toLocaleDateString()}</h4>`;
+                        popupContent.innerHTML = `<h3>Crear Disponibilidad para ${selectedDate.toLocaleDateString()}</h3>`;
                         popupContent.innerHTML += response.data;
                         const availabilityForm = document.getElementById('gm-availability-form');
                         if (availabilityForm) {
                             availabilityForm.addEventListener('submit', handleFormSubmit);
                         }
                     } else {
-                        popupContent.innerHTML += `<p>${response.data}</p>`;
+                        popupContent.innerHTML = `<p>${response.data}</p>`;
                     }
                 }
             );
+        }
+
+        popup.style.display = 'block';
+
+        document.querySelectorAll('.edit-availability').forEach(button => {
+            button.addEventListener('click', handleEditAvailability);
         });
+
+        document.querySelectorAll('.delete-availability').forEach(button => {
+            button.addEventListener('click', handleDeleteAvailability);
+        });
+
+        // Añadir el evento al botón de añadir disponibilidad
+        const addAvailabilityButton = document.getElementById('add-availability');
+        if (addAvailabilityButton) {
+            addAvailabilityButton.addEventListener('click', () => {
+                jQuery.post(
+                    ajaxurl,
+                    {
+                        action: 'gm_get_availability_form',
+                        date: `${year}-${(month + 1).toString().padStart(2, '0')}-${date.toString().padStart(2, '0')}`
+                    },
+                    function(response) {
+                        if (response.success) {
+                            popupContent.innerHTML += `<h4>Crear Nueva Disponibilidad para ${selectedDate.toLocaleDateString()}</h4>`;
+                            popupContent.innerHTML += response.data;
+                            const availabilityForm = document.getElementById('gm-availability-form');
+                            if (availabilityForm) {
+                                availabilityForm.addEventListener('submit', handleFormSubmit);
+                            }
+                        } else {
+                            popupContent.innerHTML += `<p>${response.data}</p>`;
+                        }
+                    }
+                );
+            });
+        }
     }
-}
 
     // eliminar disponibilidades en el calendario de grupos musicales
     function handleDeleteAvailability(event) {
@@ -296,5 +309,5 @@ document.addEventListener('DOMContentLoaded', function() {
         loadCalendar();
     });
 
-    loadCalendar();
+    loadAvailabilities();
 });
