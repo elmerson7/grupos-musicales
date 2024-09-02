@@ -87,7 +87,6 @@ function gm_availability_form_shortcode() {
     }
 
     $user_id = get_current_user_id();
-    echo '<p>ID del usuario actual: ' . $user_id . '</p>';
 
     ob_start();
     include plugin_dir_path(__FILE__) . '../templates/availability-form.php';
