@@ -31,7 +31,7 @@ document.getElementById('gm-group-profile-form').addEventListener('submit', func
     }
 
     if (region === "") {
-        errors.push('Seleccione Area Geográfica.');
+        errors.push('Seleccione Zona Geográfica.');
     }
 });
 

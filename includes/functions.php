@@ -144,10 +144,11 @@ function gm_create_tables() {
             photo varchar(255) DEFAULT '' NOT NULL,
             name varchar(100) NOT NULL,
             description text NOT NULL,
-            region varchar(100) NOT NULL,
+            id_zone int(11) NOT NULL,
             email varchar(100) NOT NULL,
             phone varchar(20) NOT NULL,
-            PRIMARY KEY  (id)
+            PRIMARY KEY  (id),
+            FOREIGN KEY (id_zone) REFERENCES {$wpdb->prefix}gm_zones(id) ON DELETE CASCADE
         ) $charset_collate;",
 
         "CREATE TABLE {$wpdb->prefix}gm_availabilities (
@@ -173,6 +174,15 @@ function gm_create_tables() {
             FOREIGN KEY (group_id) REFERENCES {$wpdb->prefix}gm_groups(id) ON DELETE CASCADE,
             FOREIGN KEY (availability_id) REFERENCES {$wpdb->prefix}gm_availabilities(id) ON DELETE CASCADE
         ) $charset_collate;",
+
+        "CREATE TABLE {$wpdb->prefix}gm_zones (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            name_zone varchar(255) NOT NULL,
+            description_zone text NOT NULL,
+            status int(11) NOT NULL,
+            PRIMARY KEY  (id)
+        ) $charset_collate;",
+
     ];
 
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -412,3 +422,71 @@ function gm_handle_contract() {
     }
 }
 add_action('wp_ajax_gm_contract', 'gm_handle_contract');
+
+
+// Función para manejar la solicitud AJAX
+function gm_get_availabilities_ajax() {
+    check_ajax_referer('gm_availability_action', 'security'); // Verifica el nonce para seguridad
+
+    if (!is_user_logged_in() || !current_user_can('gm_group')) {
+        wp_send_json_error('No tienes permiso para acceder a esta información.');
+        return;
+    }
+
+    global $wpdb;
+    $current_user_id = get_current_user_id();
+    $group_id = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$wpdb->prefix}gm_groups WHERE user_id = %d", $current_user_id));
+
+    if (!$group_id) {
+        wp_send_json_error('No se encontró un grupo asociado al usuario actual.');
+        return;
+    }
+
+    // Realizar la consulta para obtener todas las disponibilidades
+    $availabilities = $wpdb->get_results($wpdb->prepare("
+        SELECT a.*, c.contractor_name 
+        FROM {$wpdb->prefix}gm_availabilities a 
+        LEFT JOIN {$wpdb->prefix}gm_contracts c ON a.id = c.availability_id 
+        WHERE a.group_id = %d
+    ", $group_id));
+
+    if (empty($availabilities)) {
+        wp_send_json_error('No se encontraron disponibilidades para tu grupo musical.');
+        return;
+    }
+
+    wp_send_json_success($availabilities);
+}
+
+// Registrar las acciones para AJAX
+add_action('wp_ajax_gm_get_availabilities', 'gm_get_availabilities_ajax');
+add_action('wp_ajax_nopriv_gm_get_availabilities', 'gm_get_availabilities_ajax');
+
+
+function gm_get_contractor_availabilities_ajax() {
+    check_ajax_referer('gm_contract_action', 'security'); // Verifica el nonce para seguridad
+
+    global $wpdb;
+
+    // Realizar la consulta para obtener todas las disponibilidades junto con la información del grupo musical y las contrataciones
+    $availabilities = $wpdb->get_results("
+        SELECT a.*, c.contractor_name, g.photo, g.description, g.id_zone, g.name AS group_name, d.name_zone 
+        FROM {$wpdb->prefix}gm_availabilities a 
+        JOIN {$wpdb->prefix}gm_groups g ON a.group_id = g.id
+        LEFT JOIN {$wpdb->prefix}gm_contracts c ON a.id = c.availability_id
+        LEFT JOIN {$wpdb->prefix}gm_zones d ON d.id = g.id_zone
+        WHERE d.status = 1
+    ");
+
+    if (empty($availabilities)) {
+        wp_send_json_error('No se encontraron disponibilidades.');
+        return;
+    }
+
+    wp_send_json_success($availabilities);
+}
+
+// Registrar las acciones para AJAX
+add_action('wp_ajax_gm_get_contractor_availabilities', 'gm_get_contractor_availabilities_ajax');
+add_action('wp_ajax_nopriv_gm_get_contractor_availabilities', 'gm_get_contractor_availabilities_ajax');
+

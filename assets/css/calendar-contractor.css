@@ -113,10 +113,10 @@
     padding: 20px;
     border: 1px solid #888;
     width: 80%;
-    max-width: 500px;
+    max-width: 700px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 10px;
-    text-align: center;
+    text-align: left;
 }
 
 .popup-content h2 {
@@ -157,18 +157,122 @@
     background-color: #45a049;
 }
 
-.availability-item {
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    text-align: left;
-}
-
 .availability-item.contracted {
     background-color: #e1bee7;
 }
 
 .availability-item p {
     margin: 5px 0;
+}
+.availability-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.availability-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.availability-photo {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 20px;
+    border: 1px solid #ddd;
+}
+
+.availability-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.availability-time {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    font-weight: bold;
+}
+
+.availability-time p {
+    margin: 0;
+    font-size: 1em;
+    color: #333;
+}
+
+.availability-action {
+    margin-right: auto;
+}
+
+.contract-button {
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    background-color: #4CAF50;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+.contract-button:hover {
+    background-color: #45a049;
+}
+
+.contracted .contract-button {
+    display: none;
+}
+
+.availability-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 10px;
+}
+
+@media screen and (max-width: 600px) {
+    #calendar-filters {
+        flex-direction: column;
+    }
+    .availability-header {
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .availability-photo {
+        max-width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .availability-info {
+        text-align: center;
+        max-width: 100%;
+    }
+
+    .availability-details {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .availability-time {
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .availability-action {
+        margin: 10px 0;
+    }
 }
