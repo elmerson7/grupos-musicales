@@ -88,6 +88,36 @@ document.addEventListener('DOMContentLoaded', function() {
                         let startTime = document.getElementById('start_time');
                         let endTime = document.getElementById('end_time');
 
+                        let divFechaFin = document.getElementById('divFechaFin');
+                        let cancelEvent = document.getElementById('cancelEvent');
+                        let radioButtons = document.querySelectorAll('.radioEvent');
+                        let endDate = document.getElementById('endDate');
+
+                        cancelEvent.addEventListener('click', function() {
+                            radioButtons.forEach(function(radio) {
+                                radio.checked = false;
+                            });
+
+                            if (divFechaFin) {
+                                divFechaFin.style.display = 'none';
+                                divFechaFin.value = '';
+                            }
+                            contentEvent.style.display = 'none';
+                            endDate.removeAttribute('required');
+                            endDate.setAttribute('disabled','disabled');
+                            endDate.value = '';
+                        });
+
+                        document.querySelectorAll('.radioEvent').forEach(function(radio) {
+                            radio.addEventListener('click', function() {
+                                contentEvent.style.display = 'flex';
+                                divFechaFin.style.display = 'block';
+                                endDate.setAttribute('required','required');
+                                endDate.removeAttribute('disabled');
+
+                            });
+                        });
+
                         btnAllDay.addEventListener('change', function(){
                             if(this.checked){
                                 startTime.value = '00:00';
@@ -142,6 +172,36 @@ document.addEventListener('DOMContentLoaded', function() {
                             let btnAllDay = document.getElementById('all_day');
                             let startTime = document.getElementById('start_time');
                             let endTime = document.getElementById('end_time');
+
+                            let divFechaFin = document.getElementById('divFechaFin');
+                            let cancelEvent = document.getElementById('cancelEvent');
+                            let radioButtons = document.querySelectorAll('.radioEvent');
+                            let endDate = document.getElementById('endDate');
+
+                            cancelEvent.addEventListener('click', function() {
+                                radioButtons.forEach(function(radio) {
+                                    radio.checked = false;
+                                });
+
+                                if (divFechaFin) {
+                                    divFechaFin.style.display = 'none';
+                                    divFechaFin.value = '';
+                                }
+                                contentEvent.style.display = 'none';
+                                endDate.removeAttribute('required');
+                                endDate.setAttribute('disabled','disabled');
+                                endDate.value = '';
+                            });
+
+                            document.querySelectorAll('.radioEvent').forEach(function(radio) {
+                                radio.addEventListener('click', function() {
+                                    contentEvent.style.display = 'flex';
+                                    divFechaFin.style.display = 'block';
+                                    endDate.setAttribute('required','required');
+                                    endDate.removeAttribute('disabled');
+
+                                });
+                            });
 
                             btnAllDay.addEventListener('change', function(){
                                 if(this.checked){
