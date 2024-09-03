@@ -33,7 +33,6 @@ $contractors = $wpdb->get_results("
                             <td><?php echo esc_html($contractor->user_login); ?></td>
                             <td><?php echo esc_html($contractor->user_email); ?></td>
                             <td>
-                                <a href="#" class="edit-contractor" data-id="<?php echo esc_attr($contractor->ID); ?>">Editar</a> |
                                 <a href="#" class="delete-contractor" data-id="<?php echo esc_attr($contractor->ID); ?>">Eliminar</a>
                             </td>
                         </tr>
