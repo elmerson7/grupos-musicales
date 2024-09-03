@@ -1,6 +1,4 @@
 <?php
-
-// Añadir menú "Disponibilidades" al panel de administración
 function gm_register_menus() {
     // Menú principal para "Disponibilidades"
     add_menu_page(
@@ -13,6 +11,17 @@ function gm_register_menus() {
         6                     // Posición del menú
     );
 
+    // Menú principal para "Contrataciones"
+    add_menu_page(
+        'Contrataciones',  // Título de la página
+        'Contrataciones',  // Título del menú
+        'manage_options',    // Capacidad requerida
+        'gm_contrataciones', // Slug de la página
+        'gm_contrataciones_page', // Función de contenido
+        'dashicons-clipboard', // Icono del menú
+        7                     // Posición del menú
+    );
+
     // Menú principal para "Grupo Musical"
     add_menu_page(
         'Grupo Musical',          // Título de la página
@@ -21,7 +30,7 @@ function gm_register_menus() {
         'gm_grupo_musical',       // Slug de la página
         'gm_grupo_musical_page',  // Función de contenido
         'dashicons-groups',       // Icono del menú
-        7                         // Posición del menú
+        8                         // Posición del menú
     );
 
     // Menú principal para "Contratante"
@@ -32,15 +41,19 @@ function gm_register_menus() {
         'gm_contratante',         // Slug de la página
         'gm_contratante_page',    // Función de contenido
         'dashicons-businessman',  // Icono del menú
-        8                         // Posición del menú
+        9                         // Posición del menú
     );
 }
-
 add_action('admin_menu', 'gm_register_menus');
 
 // Función de contenido para "Disponibilidades"
 function gm_availabilities_page() {
     include plugin_dir_path(__FILE__) . '../templates/gm-availabilities-page.php';
+}
+
+// Función de contenido para "Contrataciones"
+function gm_contrataciones_page() {
+    include plugin_dir_path(__FILE__) . '../templates/gm-contrataciones-page.php';
 }
 
 // Función de contenido para "Grupo Musical"
@@ -53,7 +66,7 @@ function gm_contratante_page() {
     include plugin_dir_path(__FILE__) . '../templates/gm-contratante-page.php';
 }
 
-
+/* DISPONIILIDADES */
 // Endpoint para crear una nueva disponibilidad
 function gm_availabilities_page_create_availability() {
     check_ajax_referer('gm_availability_action', '_wpnonce');
@@ -168,6 +181,80 @@ function gm_availabilities_page_delete_availability() {
 }
 add_action('wp_ajax_gm_availabilities_page_delete_availability', 'gm_availabilities_page_delete_availability');
 
+/* CONTRATACIONES */
+// Endpoint para obtener disponibilidades no contratadas de un grupo musical
+function gm_get_availabilities_by_group() {
+    check_ajax_referer('gm_contratacion_action', '_wpnonce');
+
+    if (isset($_POST['group_id'])) {
+        global $wpdb;
+        $group_id = intval($_POST['group_id']);
+        
+        $availabilities = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gm_availabilities WHERE group_id = %d AND contracted = 0", $group_id));
+
+        wp_send_json_success($availabilities);
+    } else {
+        wp_send_json_error('ID de grupo no recibido.');
+    }
+}
+add_action('wp_ajax_gm_get_availabilities_by_group', 'gm_get_availabilities_by_group');
+
+// Endpoint para crear una nueva contratación
+function gm_create_contract() {
+    check_ajax_referer('gm_contratacion_action', '_wpnonce');
+
+    if (isset($_POST['contractor_id']) && isset($_POST['group_id']) && isset($_POST['availability_id'])) {
+        global $wpdb;
+
+        $contractor_id = intval($_POST['contractor_id']);
+        $group_id = intval($_POST['group_id']);
+        $availability_id = intval($_POST['availability_id']);
+
+        // Obtener los datos del contratante desde la tabla `users`
+        $contractor = get_userdata($contractor_id);
+        if (!$contractor) {
+            wp_send_json_error('Contratante no encontrado.');
+            return;
+        }
+
+        $contractor_name = $contractor->display_name;
+        $contractor_email = $contractor->user_email;
+        $contractor_phone = get_user_meta($contractor_id, 'phone', true); // Asegúrate de que el número de teléfono está guardado en meta como 'phone'
+
+        // Obtener la fecha de la tabla `qYDj7_gm_availabilities`
+        $availability = $wpdb->get_row($wpdb->prepare("SELECT date FROM {$wpdb->prefix}gm_availabilities WHERE id = %d", $availability_id));
+        if (!$availability) {
+            wp_send_json_error('Disponibilidad no encontrada.');
+            return;
+        }
+
+        $date = $availability->date;
+
+        // Preparar los datos para insertar en `gm_contracts`
+        $data = [
+            'group_id' => $group_id,
+            'availability_id' => $availability_id,
+            'contractor_name' => sanitize_text_field($contractor_name),
+            'contractor_email' => sanitize_email($contractor_email),
+            'contractor_phone' => sanitize_text_field($contractor_phone),
+            'date' => sanitize_text_field($date),
+        ];
+
+        // Insertar la contratación
+        $result = gm_add_contract($data);
+
+        if ($result) {
+            wp_send_json_success('Contract created successfully.');
+        } else {
+            wp_send_json_error('Error al crear el contrato.');
+        }
+    } else {
+        wp_send_json_error('Datos de contratación no recibidos correctamente.');
+    }
+}
+add_action('wp_ajax_gm_create_contract', 'gm_create_contract');
+
+/* GRUPOS */
 // Endpoint para crear un nuevo grupo
 function gm_groups_page_create_group() {
     check_ajax_referer('gm_group_action', '_wpnonce');
@@ -310,7 +397,6 @@ function gm_groups_page_update_group() {
     }
 }
 add_action('wp_ajax_gm_groups_page_update_group', 'gm_groups_page_update_group');
-
 
 // Función para eliminar un grupo
 function gm_groups_page_delete_group() {
