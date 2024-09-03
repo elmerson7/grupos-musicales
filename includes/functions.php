@@ -431,6 +431,73 @@ function gm_groups_page_delete_group() {
 }
 add_action('wp_ajax_gm_groups_page_delete_group', 'gm_groups_page_delete_group');
 
+// Función para eliminar un contrato
+function gm_groups_page_delete_contract() {
+    if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'gm_contratacion_action')) {
+        wp_send_json_error('Nonce verification failed');
+        return;
+    }
+
+    if (isset($_POST['contractId'])) {
+        global $wpdb;
+
+        $contract_id = intval($_POST['contractId']);
+
+        $contract = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gm_contracts WHERE id = %d", $contract_id));
+        
+        if ($contract) {
+            $result = $wpdb->delete("{$wpdb->prefix}gm_contracts", ['id' => $contract_id]);
+            // $result = false;
+            if ($result) {
+                wp_send_json_success('Contrato eliminado exitosamente');
+            }else{
+                wp_send_json_error('Error al eliminar Contrato.');
+            }
+        } else {
+            wp_send_json_error('El Contrato no existe.');
+        }
+    } else {
+        wp_send_json_error('Datos no recibidos correctamente.');
+    }
+}
+add_action('wp_ajax_gm_groups_page_delete_contract', 'gm_groups_page_delete_contract');
+
+// Función para eliminar un Contratista
+function gm_groups_page_delete_contractor() {
+    if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'gm_availability_action')) {
+        wp_send_json_error('Nonce verification failed');
+        return;
+    }
+
+    if (isset($_POST['contractorId'])) {
+        global $wpdb;
+
+        $contractor_id = intval($_POST['contractorId']);
+        
+        $contractor = $wpdb->get_row($wpdb->prepare("SELECT u.ID, u.user_login, u.user_email FROM {$wpdb->users} u INNER JOIN {$wpdb->usermeta} um ON u.ID = um.user_id WHERE um.meta_key = '{$wpdb->prefix}capabilities' AND um.meta_value LIKE '%gm_contractor%' AND id = %d", $contractor_id));
+
+        if ($contractor) {
+            $updated = $wpdb->update(
+                $wpdb->users,
+                array('user_status' => 1), // Valor de 'user_status', en este caso 1
+                array('ID' => $contractor->ID),
+                array('%d'),
+                array('%d')
+            );
+
+            if ($updated) {
+                wp_send_json_success('El estado del contratista se ha actualizado correctamente.');
+            } else {
+                wp_send_json_error('Error al actualizar el estado del Contratista.');
+            }
+        }else{
+            wp_send_json_error('Contratista no encontrado.');
+        }
+    } else {
+        wp_send_json_error('Datos no recibidos correctamente.');
+    }
+}
+add_action('wp_ajax_gm_groups_page_delete_contractor', 'gm_groups_page_delete_contractor');
 
 function gm_create_tables() {
     global $wpdb;
