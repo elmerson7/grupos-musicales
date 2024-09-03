@@ -68,4 +68,33 @@ document.addEventListener('DOMContentLoaded', function() {
         );
     });
 
+    document.querySelectorAll('.delete-contract').forEach(button => {
+        button.addEventListener('click', function() {
+            const contractId = this.dataset.id;
+            console.log(contractId);
+            if (confirm('¿Estás seguro de eliminar este grupo?')) {
+                deleteContract(contractId);
+            }
+        });
+    });
+    
+    function deleteContract(contractId) {
+        jQuery.post(
+            ajaxurl,
+            {
+                action: 'gm_groups_page_delete_contract',
+                _wpnonce: gm_contratacion_nonce,
+                contractId: contractId
+            },
+            function(response) {
+                if (response.success) {
+                    alert('Contrato eliminado exitosamente.');
+                    location.reload();
+                } else {
+                    alert(response.data);
+                }
+            }
+        );
+    }
+
 });

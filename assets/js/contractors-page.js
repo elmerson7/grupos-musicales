@@ -40,6 +40,15 @@ document.addEventListener('DOMContentLoaded', function() {
         editModal.style.display = 'none';
     });
 
+    document.querySelectorAll('.delete-contractor').forEach(button => {
+        button.addEventListener('click', function() {
+            const contractorId = this.dataset.id;
+            // console.log(contractorId);            
+            if (confirm('¿Estás seguro de eliminar este grupo?')) {
+                deleteContractor(contractorId);
+            }
+        });
+    });
     // saveChangesButton.addEventListener('click', function() {
     //     const groupId = document.getElementById('edit_group_id').value;
     //     const name = document.getElementById('edit_name').value.trim();
@@ -206,6 +215,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     location.reload();
                 } else {
                     alert('Error al eliminar el grupo: ' + response.data);
+                }
+            }
+        );
+    }
+
+    function deleteContractor(contractorId) {
+        jQuery.post(
+            ajaxurl,
+            {
+                action: 'gm_groups_page_delete_contractor',
+                _wpnonce: gm_group_nonce,
+                contractorId: contractorId
+            },
+            function(response) {
+                if (response.success) {
+                    alert('Contratista eliminado exitosamente.');
+                    location.reload();
+                } else {
+                    alert('Error al eliminar Contratista: ' + response.data);
                 }
             }
         );

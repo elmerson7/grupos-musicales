@@ -6,8 +6,7 @@ $contractors = $wpdb->get_results("
     FROM {$wpdb->users} u
     INNER JOIN {$wpdb->usermeta} um ON u.ID = um.user_id
     WHERE um.meta_key = '{$wpdb->prefix}capabilities'
-    AND um.meta_value LIKE '%gm_contractor%'
-");
+    AND um.meta_value LIKE '%gm_contractor%' AND u.user_status = 0");
 
 ?>
 <div class="wrap">
