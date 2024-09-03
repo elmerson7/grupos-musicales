@@ -84,6 +84,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 calendarDates.appendChild(emptyCell);
             }
         }
+        if (contadorContracted>=2) {
+            console.log('Has realizado el máximo de contrataciones este mes');
+        }
     }
 
     function getDayAvailabilities(year, month, date, filter, id_zone) {
@@ -128,12 +131,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (dayAvailabilities.length > 0) {
             popupContent.innerHTML = `<h2>Disponibilidades para ${selectedDate.toLocaleDateString()}</h2>`;
             dayAvailabilities.forEach(availability => {
-                // Verifica si el botón de contratación debe ser ocultado
                 let contractButton = '';
+                let deleteContract = '';
                 if (contadorContracted >= 2 && !availability.contractor_name) {
                     contractButton = ``;
                 }else{
                     contractButton = `<button class="contract-button" data-availability-id="${availability.id}">Contratar</button>`;
+                }
+                
+                if (availability.contractor_name && availability.contractor_name === wp_current_user_name) {
+                    deleteContract = `<button class="delete-availabilityC" data-contracted-id="${availability.id}"><i class="fas fa-trash-alt"></i></button>`;
                 }
     
                 popupContent.innerHTML += `
@@ -149,6 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="availability-details"> <!-- Contenedor flexible -->
                             <div class="availability-action">
                                 ${contractButton}
+                                ${deleteContract}
                             </div>
                             <div class="availability-time">
                                 <p><strong>Inicio:</strong> ${new Date(availability.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
@@ -166,13 +174,46 @@ document.addEventListener('DOMContentLoaded', function() {
                     contractAvailability(availabilityId);
                 });
             });
+            // Agregar eventos a los botones de contratación
+            document.querySelectorAll('.delete-availabilityC').forEach(button => {
+                button.addEventListener('click', () => {
+                    const contract = button.dataset.contractedId;
+                    deleteContract(contract);
+                });
+            });
         } else {
             popupContent.innerHTML = `<h2>No hay disponibilidades para ${selectedDate.toLocaleDateString()}</h2>`;
         }
         popup.style.display = 'block';
     }
-    
 
+    function deleteContract(contractId) {
+        if (confirm('¿Estás seguro de que deseas eliminar este contrato?')) {
+            jQuery.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'gm_delete_contract',
+                    contract_id: contractId,
+                    _ajax_nonce: gm_contract_nonce // Añadir el nonce para seguridad
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert('Contrato eliminado exitosamente.');
+                        location.reload();
+                        // Actualizar el calendario o la UI aquí si es necesario
+                    } else {
+                        alert('Error al eliminar el contrato: ' + response.data);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('Ocurrió un error al intentar eliminar el contrato.');
+                }
+            });
+        }
+    }
+    
+    
     function contractAvailability(availabilityId) {
         if (confirm('¿Estás seguro de que quieres contratar esta disponibilidad?')) {
             jQuery.post(
