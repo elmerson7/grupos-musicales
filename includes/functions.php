@@ -539,14 +539,12 @@ function gm_handle_availability_ajax() {
     }
 
     if ($event != 0) {
-        // Convertir las fechas a objetos DateTime para poder manipularlas
         $startDateTime = new DateTime($date . ' ' . $start_time);
         $endDateTime = new DateTime($date . ' ' . $end_time);
         $finalEndDate = new DateTime($endDate);
 
         $interval = null;
 
-        // Determinar el intervalo en función del tipo de evento
         switch ($event) {
             case 'diario':
                 $interval = new DateInterval('P1D'); // 1 día
@@ -555,20 +553,40 @@ function gm_handle_availability_ajax() {
                 $interval = new DateInterval('P7D'); // 7 días
                 break;
             case 'mensual':
-                $interval = new DateInterval('P30D'); // 30 días
+                $interval = new DateInterval('P1M'); // 1 mes
                 break;
             default:
                 $interval = null;
                 break;
         }
 
-        $period = new DatePeriod($startDateTime, $interval, $finalEndDate->modify('+1 day'));
+        $currentDateTime = clone $startDateTime;
+        $selectedDay = $startDateTime->format('d');
 
-        foreach ($period as $dt) {
+        while ($currentDateTime <= $finalEndDate) {
+            $month = $currentDateTime->format('m');
+            $year = $currentDateTime->format('Y');
+
+            // Verificar si el mes tiene el día seleccionado
+            $lastDayOfMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            if ($selectedDay > $lastDayOfMonth) {
+                // Si el mes no tiene el día seleccionado, avanzar al siguiente mes
+                $currentDateTime->add($interval);
+                continue;
+            }
+
+            // Verificar si la fecha calculada excede el rango de endDate
+            $calculatedDate = new DateTime($year . '-' . $month . '-' . $selectedDay);
+            if ($calculatedDate > $finalEndDate) {
+                break;
+            }
+
+            // Insertar el registro solo si la fecha es válida
             $data = [
                 'group_id' => $group_id,
-                'date' => $dt->format('Y-m-d H:i:s'),
-                'end_time' => $dt->format('Y-m-d') . ' ' . $end_time,
+                'date' => $calculatedDate->format('Y-m-d H:i:s'),
+                'end_time' => $calculatedDate->format('Y-m-d') . ' ' . $end_time,
                 'all_day' => $all_day,
             ];
 
@@ -578,8 +596,11 @@ function gm_handle_availability_ajax() {
                 wp_send_json_error("Error en el registro: No se pudo insertar la disponibilidad en la base de datos.");
                 return;
             }
+
+            // Avanzar al próximo mes
+            $currentDateTime->add($interval);
         }
-    }else{
+    } else {
         $data = [
             'group_id' => $group_id,
             'date' => $date . ' ' . $start_time,
@@ -593,11 +614,8 @@ function gm_handle_availability_ajax() {
             wp_send_json_success("Inserción exitosa en la tabla gm_availabilities.");
         }
     }
-
-
     wp_send_json_success("Inserción exitosa en la tabla gm_availabilities.");
 }
-
 
 add_action('wp_ajax_gm_handle_availability_ajax', 'gm_handle_availability_ajax');
 add_action('wp_ajax_nopriv_gm_handle_availability_ajax', 'gm_handle_availability_ajax');

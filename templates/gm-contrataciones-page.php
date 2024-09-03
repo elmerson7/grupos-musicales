@@ -48,7 +48,6 @@ $musical_groups = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}gm_gro
                             <td><?php echo esc_html(date('Y-m-d', strtotime($contratacion->availability_date))); ?></td>
                             <td><?php echo esc_html(date('H:i', strtotime($contratacion->availability_date))); ?> - <?php echo esc_html(date('H:i', strtotime($contratacion->availability_end_time))); ?></td>
                             <td>
-                                <a href="#" class="edit-contract" data-id="<?php echo esc_attr($contratacion->contract_id); ?>">Editar</a> |
                                 <a href="#" class="delete-contract" data-id="<?php echo esc_attr($contratacion->contract_id); ?>">Eliminar</a>
                             </td>
                         </tr>
@@ -82,7 +81,6 @@ $musical_groups = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}gm_gro
                 <div class="form-group">
                     <label for="create_availability_id">Disponibilidades</label>
                     <select id="create_availability_id" required>
-                        <!-- Las disponibilidades se cargarán aquí vía AJAX -->
                     </select>
                 </div>
                 
