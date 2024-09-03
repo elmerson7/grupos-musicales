@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadCalendar() {       
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
+        let contadorContracted = 0;
         
         calendarMonthYear.textContent = currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
         
@@ -65,10 +66,14 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (dayAvailabilities.length > 0) {
                 const isContracted = dayAvailabilities.some(a => a.contractor_name === wp_current_user_name);
+                if (isContracted) {
+                    contadorContracted++;
+                }
+            
                 dateCell.classList.add(isContracted ? 'contracted' : 'available');
             }
 
-            dateCell.addEventListener('click', () => showPopup(year, month, date, dayAvailabilities));
+            dateCell.addEventListener('click', () => showPopupC(year, month, date, dayAvailabilities, contadorContracted));
             calendarDates.appendChild(dateCell);
         }
 
@@ -79,7 +84,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 calendarDates.appendChild(emptyCell);
             }
         }
-
     }
 
     function getDayAvailabilities(year, month, date, filter, id_zone) {
@@ -117,14 +121,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function showPopup(year, month, date, dayAvailabilities) {
+    function showPopupC(year, month, date, dayAvailabilities, contadorContracted) {
         const selectedDate = new Date(year, month, date);
-        popupContent.innerHTML = '';
-
+        popupContent.innerHTML = ''; 
+        
         if (dayAvailabilities.length > 0) {
             popupContent.innerHTML = `<h2>Disponibilidades para ${selectedDate.toLocaleDateString()}</h2>`;
             dayAvailabilities.forEach(availability => {
-                const contractButton = availability.contractor_name ? '' : `<button class="contract-button" data-availability-id="${availability.id}">Contratar</button>`;
+                // Verifica si el botón de contratación debe ser ocultado
+                let contractButton = '';
+                if (contadorContracted >= 2 && !availability.contractor_name) {
+                    contractButton = ``;
+                }else{
+                    contractButton = `<button class="contract-button" data-availability-id="${availability.id}">Contratar</button>`;
+                }
+    
                 popupContent.innerHTML += `
                     <div class="availability-item ${availability.contractor_name ? 'contracted' : ''}">
                         <div class="availability-header">
@@ -147,7 +158,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
             });
-
+    
+            // Agregar eventos a los botones de contratación
             document.querySelectorAll('.contract-button').forEach(button => {
                 button.addEventListener('click', () => {
                     const availabilityId = button.dataset.availabilityId;
@@ -157,9 +169,9 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             popupContent.innerHTML = `<h2>No hay disponibilidades para ${selectedDate.toLocaleDateString()}</h2>`;
         }
-
         popup.style.display = 'block';
     }
+    
 
     function contractAvailability(availabilityId) {
         if (confirm('¿Estás seguro de que quieres contratar esta disponibilidad?')) {
