@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
     prevMonth.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() - 1);
         loadCalendar();
-        let limitMonth = currentMonth+4;
+        let limitMonth = currentMonth+2;
         let monthArrow = currentDate.getMonth();
         let yearArrow = currentDate.getFullYear();
         console.log(`currentMonth: ${currentMonth}, monthArrow: ${monthArrow}, limitMonth: ${limitMonth}, currentYear ${yearArrow}, mes actual: ${currentYear}`);
@@ -258,9 +258,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 nextMonth.style.visibility = 'visible';
             }
     
-            if (monthArrow == currentMonth) {
-                prevMonth.style.visibility = 'hidden';
-            }    
+            // if (monthArrow == currentMonth) {
+            //     prevMonth.style.visibility = 'hidden';
+            // }    
         }
         else{
             if (monthArrow >= currentMonth && monthArrow < limitMonth ) {
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
     nextMonth.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() + 1);
         loadCalendar();
-        let limitMonth = currentMonth+4;
+        let limitMonth = currentMonth+2;
         let monthArrow = currentDate.getMonth();
         let yearArrow = currentDate.getFullYear();
 
