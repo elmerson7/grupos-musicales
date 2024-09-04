@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentDate = new Date();
     let availabilities = [];
 
+    let currentMonth = currentDate.getMonth();
+    let currentYear = currentDate.getFullYear();
+
     // Función para cargar disponibilidades desde el servidor
     function loadAvailabilities() {
         jQuery.post(
@@ -23,7 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
             function(response) {
                 if (response.success) {
                     availabilities = response.data;
-
                     loadCalendar(); // Cargar el calendario con las disponibilidades obtenidas
                 } else {
                     alert('Error al cargar disponibilidades: ' + response.data);
@@ -36,9 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
         let contadorContracted = 0;
-        
         calendarMonthYear.textContent = currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-        
         calendarDates.innerHTML = '';
         
         const firstDay = new Date(year, month, 1).getDay();
@@ -248,11 +248,71 @@ document.addEventListener('DOMContentLoaded', function() {
     prevMonth.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() - 1);
         loadCalendar();
+        let limitMonth = currentMonth+4;
+        let monthArrow = currentDate.getMonth();
+        let yearArrow = currentDate.getFullYear();
+        console.log(`currentMonth: ${currentMonth}, monthArrow: ${monthArrow}, limitMonth: ${limitMonth}, currentYear ${yearArrow}, mes actual: ${currentYear}`);
+
+        if (limitMonth<12) {
+            if (monthArrow >= currentMonth && monthArrow < limitMonth ) {
+                nextMonth.style.visibility = 'visible';
+            }
+    
+            if (monthArrow == currentMonth) {
+                prevMonth.style.visibility = 'hidden';
+            }    
+        }
+        else{
+            if (monthArrow >= currentMonth && monthArrow < limitMonth ) {
+                nextMonth.style.visibility = 'visible';
+            }
+
+            if (limitMonth == 12 || limitMonth == 13 || limitMonth == 14) {
+                if (monthArrow == currentMonth) {
+                    prevMonth.style.visibility = 'hidden';
+                }             
+            }
+        }
     });
 
     nextMonth.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() + 1);
         loadCalendar();
+        let limitMonth = currentMonth+4;
+        let monthArrow = currentDate.getMonth();
+        let yearArrow = currentDate.getFullYear();
+
+        console.log(`currentMonth: ${currentMonth}, monthArrow: ${monthArrow}, limitMonth: ${limitMonth}, currentYear ${yearArrow}, mes actual: ${currentYear}`);
+
+        if (limitMonth<12) {
+            if (monthArrow >= limitMonth) {
+                nextMonth.style.visibility = 'hidden';
+                prevMonth.style.visibility = 'visible';
+            }
+    
+            if (monthArrow > currentMonth && monthArrow <=limitMonth) {
+                prevMonth.style.visibility = 'visible';
+            }    
+        }else{
+            if (limitMonth == 12 && yearArrow == currentYear+1) {
+                if (monthArrow == 0) {
+                    nextMonth.style.visibility = 'hidden';
+                    prevMonth.style.visibility = 'visible';
+                }
+            }else if(limitMonth == 13 && yearArrow == currentYear+1){
+                if (monthArrow == 1) {
+                    nextMonth.style.visibility = 'hidden';
+                    prevMonth.style.visibility = 'visible';
+                }
+            }else if(limitMonth == 14 && yearArrow == currentYear+1){
+                if (monthArrow == 2) {
+                    nextMonth.style.visibility = 'hidden';
+                    prevMonth.style.visibility = 'visible';
+                }
+            }else{
+                prevMonth.style.visibility = 'visible';                
+            }
+        }
     });
 
     filterSelect.addEventListener('change', loadCalendar);

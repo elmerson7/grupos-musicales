@@ -275,4 +275,8 @@
     .availability-action {
         margin: 10px 0;
     }
+
+}
+#prev-month{
+    visibility: hidden;
 }
