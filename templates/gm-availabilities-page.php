@@ -2,7 +2,12 @@
 global $wpdb;
 
 // Obtener todas las disponibilidades
-$availabilities = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gm_availabilities");
+// $availabilities = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gm_availabilities");
+$availabilities = $wpdb->get_results("SELECT b.name name_group,a.* FROM {$wpdb->prefix}gm_availabilities a INNER JOIN {$wpdb->prefix}gm_groups b ON a .group_id = b.id ORDER BY a.id DESC");
+
+// echo "<pre>";
+// print_r($availabilities);
+// echo "</pre>";
 
 // Obtener todos los grupos musicales
 $musical_groups = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}gm_groups");
@@ -31,7 +36,7 @@ $musical_groups = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}gm_gro
                     <?php foreach ($availabilities as $availability): ?>
                         <tr>
                             <td><?php echo esc_html($availability->id); ?></td>
-                            <td><?php echo esc_html($availability->group_id); ?></td>
+                            <td><?php echo esc_html($availability->name_group); ?></td>
                             <td><?php echo esc_html($availability->date); ?></td>
                             <td><?php echo esc_html($availability->end_time); ?></td>
                             <td><?php echo esc_html($availability->all_day ? 'Sí' : 'No'); ?></td>
@@ -117,7 +122,16 @@ $gm_availability_nonce = wp_create_nonce('gm_availability_action');
         $('#myTableAvailable').DataTable({
             "language": {
                 "url": "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
-            }
+            },
+            "order": [[0, 'desc']],
+            // "order": [[2, "desc"]],
+            // "columnDefs": 
+            // [
+            //     { 
+            //         "targets": 2,
+            //         "type": "date"
+            //     }
+            // ],
         });
     });
 

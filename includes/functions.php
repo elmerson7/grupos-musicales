@@ -634,19 +634,23 @@ function gm_handle_availability_ajax() {
             $month = $currentDateTime->format('m');
             $year = $currentDateTime->format('Y');
 
-            // Verificar si el mes tiene el día seleccionado
-            $lastDayOfMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+            if ($event == 'mensual') {
+                // Verificar si el mes tiene el día seleccionado
+                $lastDayOfMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
 
-            if ($selectedDay > $lastDayOfMonth) {
-                // Si el mes no tiene el día seleccionado, avanzar al siguiente mes
-                $currentDateTime->add($interval);
-                continue;
-            }
-
-            // Verificar si la fecha calculada excede el rango de endDate
-            $calculatedDate = new DateTime($year . '-' . $month . '-' . $selectedDay);
-            if ($calculatedDate > $finalEndDate) {
-                break;
+                if ($selectedDay > $lastDayOfMonth) {
+                    // Si el mes no tiene el día seleccionado, avanzar al siguiente mes
+                    $currentDateTime->add($interval);
+                    continue;
+                }
+                // Verificar si la fecha calculada excede el rango de endDate
+                $calculatedDate = new DateTime($year . '-' . $month . '-' . $selectedDay);
+                if ($calculatedDate > $finalEndDate) {
+                    break;
+                }
+            }else {
+                // Para los eventos diario y semanal, usamos la fecha actual
+                $calculatedDate = clone $currentDateTime;
             }
 
             // Insertar el registro solo si la fecha es válida
@@ -664,7 +668,7 @@ function gm_handle_availability_ajax() {
                 return;
             }
 
-            // Avanzar al próximo mes
+            // Avanzar al próximo Intervalo(dia,semana,mes)
             $currentDateTime->add($interval);
         }
     } else {
