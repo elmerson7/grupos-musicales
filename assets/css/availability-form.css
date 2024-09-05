@@ -3,7 +3,7 @@
     max-width: 400px;
     margin: 0 auto;
     background-color: #1b1e23; /* Fondo oscuro */
-    padding: 20px;
+    padding: 40px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     color: #fff; /* Texto blanco */
@@ -119,12 +119,15 @@ input[type="submit"]:hover {
 }
 
 #contenedor-eventos{
+    width: 100%;
     background-color: #9d4bac81;
     padding: 10px 8px;
     border-radius: 10px;
     margin-bottom: 8px;
 }
-
+#endDate{
+    width: 95%;
+}
 #contentEvent{
     display:none;
     justify-content: center;
