@@ -975,6 +975,12 @@ function gm_filter_block_navigation($block_content, $block) {
     }
     return $block_content;
 }
-
 add_filter('render_block', 'gm_filter_block_navigation', 10, 2);
 
+// Ocultar la barra de administración para usuarios que no son administradores
+function gm_ocultar_barra_admin_para_no_admins() {
+    if (!current_user_can('administrator') && !is_admin()) {
+        show_admin_bar(false);
+    }
+}
+add_action('after_setup_theme', 'gm_ocultar_barra_admin_para_no_admins');
