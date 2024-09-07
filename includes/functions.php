@@ -988,3 +988,56 @@ function gm_ocultar_barra_admin_para_no_admins() {
     }
 }
 add_action('after_setup_theme', 'gm_ocultar_barra_admin_para_no_admins');
+
+
+add_action('wp_ajax_update_profile', 'handle_update_profile');
+add_action('wp_ajax_nopriv_update_profile', 'handle_update_profile'); // Para usuarios no logueados, si es necesario
+
+function handle_update_profile() {
+    global $wpdb;
+
+    check_ajax_referer('update_profile_nonce', 'security');
+
+    $data = isset($_POST['data']) ? $_POST['data'] : array();
+    // wp_send_json_success($data);
+
+    $update_data = array();
+    $user_id = $data['user_id'];
+
+    if (isset($data['fileName']) && $data['fileName'] !== '') {
+        $update_data['profile_image'] = sanitize_text_field($data['fileName']);
+    }
+
+    if (isset($data['name']) && $data['name'] !== '') {
+        $update_data['name'] = sanitize_text_field($data['name']);
+    }
+
+    if (isset($data['id_zone']) && $data['id_zone'] !== '') {
+        $update_data['zone_id'] = intval($data['id_zone']);
+    }
+
+    if (isset($data['email']) && $data['email'] !== '') {
+        if (is_email($data['email'])) {
+            $update_data['user_email'] = sanitize_email($data['email']);
+        } else {
+            wp_send_json_error('Email no válido.');
+        }
+    }
+    if (isset($data['phone']) && $data['phone'] !== '') {
+        $update_data['phone'] = sanitize_text_field($data['phone']);
+    }
+
+    if (!empty($update_data)) {
+        $wpdb->update(
+            "{$wpdb->prefix}gm_groups",
+            $update_data,
+            array('user_id' => $user_id),
+            array('%s', '%s', '%d', '%s', '%s'),
+            array('%d')
+        );
+    }
+    wp_send_json_success('Grupo actualizado correctamente.');
+}
+
+
+
