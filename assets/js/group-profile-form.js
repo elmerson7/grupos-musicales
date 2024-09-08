@@ -2,7 +2,7 @@ document.getElementById('gm-group-profile-form').addEventListener('submit', func
     var phone = document.getElementById('phone').value.trim();
     var email = document.getElementById('email').value.trim();
     var fileInput = document.getElementById('photo');
-    var region = document.getElementById('region');
+    var zona = document.getElementById('zona');
     var file = fileInput.files[0];
     var fileType = file ? file.type.split('/')[0] : '';
 
@@ -30,7 +30,7 @@ document.getElementById('gm-group-profile-form').addEventListener('submit', func
         showError(errors.join('<br>'));
     }
 
-    if (region === "") {
+    if (zona === "") {
         errors.push('Seleccione Zona Geográfica.');
     }
 });

@@ -75,8 +75,8 @@ $zones = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gm_zone
             <textarea name="description" id="description" required></textarea>
         </div>
         <div class="form-group">
-            <label id="lblRegion" for="zone">Zona geográfica</label>
-            <select name="zone" id="zone" require>
+            <label for="zone">Zona geográfica</label>
+            <select name="zone" id="zone" required>
             <option value="" selected disabled>--Selecciona Zona--</option>
             <?php foreach ($zones as $zone): ?>
                 <option value="<?=$zone->id?>"><?=$zone->name_zone?></option>
