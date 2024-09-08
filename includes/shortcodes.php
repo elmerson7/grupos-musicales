@@ -8,7 +8,7 @@ function calendar_contractor_shortcode() {
 add_shortcode('calendar-contractor', 'calendar_contractor_shortcode');
 
 // Formulario perfil del grupo
-function gm_group_profile_form_shortcode() {
+function gm_group_profile_form_view() {
     if (!is_user_logged_in() || !current_user_can('gm_group')) {
         return 'No tienes permiso para acceder a esta página.';
     }
@@ -17,15 +17,15 @@ function gm_group_profile_form_shortcode() {
     $user_id = get_current_user_id();
     $group_exists = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}gm_groups WHERE user_id = %d", $user_id));
 
-    if ($group_exists) {
-        return 'Ya has completado tu perfil de grupo musical.';
-    }
+    // if ($group_exists) {
+    //     return 'Ya has completado tu perfil de grupo musical.';
+    // }
 
     ob_start();
-    include plugin_dir_path(__FILE__) . '../templates/group-profile-form.php';
+    include plugin_dir_path(__FILE__) . '../templates/group-profile-view.php';
     return ob_get_clean();
 }
-add_shortcode('gm_group_profile_form', 'gm_group_profile_form_shortcode');
+add_shortcode('gm_group_profile_form', 'gm_group_profile_form_view');
 
 function gm_handle_group_profile_form() {
     if (isset($_POST['submit_group_profile'])) {

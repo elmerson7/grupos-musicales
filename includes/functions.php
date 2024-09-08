@@ -988,3 +988,89 @@ function gm_ocultar_barra_admin_para_no_admins() {
     }
 }
 add_action('after_setup_theme', 'gm_ocultar_barra_admin_para_no_admins');
+
+
+add_action('wp_ajax_update_profile', 'handle_update_profile');
+add_action('wp_ajax_nopriv_update_profile', 'handle_update_profile'); // Para usuarios no logueados, si es necesario
+function handle_update_profile() {
+    global $wpdb;
+
+    check_ajax_referer('update_profile_nonce', 'security');
+
+    $data = isset($_POST) ? $_POST : array();
+    $update_data = array();
+    $user_id = isset($data['user_id_group']) ? intval($data['user_id_group']) : 0;
+
+    // Procesar imagen si se sube
+    if (!empty($_FILES['profileImage']['name'])) {
+        $uploaded_file = $_FILES['profileImage'];
+        $original_filename = $uploaded_file['name'];
+        $pathinfo = pathinfo($original_filename);
+        $unique_filename = md5(uniqid()) . '.' . $pathinfo['extension']; // Nombre único
+
+        // Definir la ruta donde guardarás el archivo
+        $upload_dir = wp_upload_dir(); // Obtener la carpeta de uploads de WordPress
+        $target_path = $upload_dir['path'] . '/' . $unique_filename; // Ruta completa del archivo
+
+        // Mover el archivo a la carpeta de uploads de WordPress con el nombre único
+        if (move_uploaded_file($uploaded_file['tmp_name'], $target_path)) {
+            $file_url = $upload_dir['url'] . '/' . $unique_filename; // URL pública del archivo subido
+
+            // Almacenar la URL de la imagen en la base de datos
+            $update_data['photo'] = esc_url_raw($file_url);
+
+            // Para depuración, puedes enviar una respuesta JSON
+            // wp_send_json_success(array(
+            //     'message' => 'Subida exitosa',
+            //     'file_path' => $target_path, // Ruta completa en el servidor
+            //     'file_url' => $file_url,     // URL pública
+            // ));
+        } else {
+            // Subida fallida, enviar mensaje de error
+            wp_send_json_error('Error al mover la imagen.');
+        }
+    }
+
+    if (isset($data['name']) && $data['name'] !== '') {
+        $update_data['name'] = sanitize_text_field($data['name']);
+    }
+
+    if (isset($data['descripcion']) && $data['descripcion'] !== '') {
+        $update_data['description'] = sanitize_text_field($data['descripcion']);
+    }
+
+    if (isset($data['id_zone']) && $data['id_zone'] !== '') {
+        $update_data['id_zone'] = intval($data['id_zone']);
+    }
+
+    if (isset($data['email']) && $data['email'] !== '') {
+        if (is_email($data['email'])) {
+            $update_data['email'] = sanitize_email($data['email']);
+        } else {
+            wp_send_json_error('Email no válido.');
+        }
+    }
+
+    if (isset($data['phone']) && $data['phone'] !== '') {
+        $update_data['phone'] = sanitize_text_field($data['phone']);
+    }
+
+    // Actualizar la base de datos solo si hay datos para actualizar
+    if (!empty($update_data) && $user_id > 0) {
+        $wpdb->update(
+            "{$wpdb->prefix}gm_groups",
+            $update_data,
+            array('user_id' => $user_id),
+            array('%s', '%s', '%d', '%s', '%s', '%s'), 
+            array('%d')
+        );
+        // wp_send_json_success($wpdb->last_query);
+        wp_send_json_success('Grupo actualizado correctamente.');
+    } else {
+        wp_send_json_error('No se recibieron datos para actualizar o el ID de usuario es inválido.');
+    }
+}
+
+
+
+
