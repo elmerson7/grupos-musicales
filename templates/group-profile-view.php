@@ -53,6 +53,12 @@ if ($wpdb->last_error) {
                         <label for="name" class="form-label">Nombre</label>
                         <input type="text" class="form-control" id="name" placeholder="Ingrese su nombre" value="<?=$data_music_group[0]->name?>">
                     </div>
+
+                    <!-- Descripcion -->
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripcion</label>
+                        <textarea  class="form-control" id="descripcion"><?=$data_music_group[0]->description?></textarea>
+                    </div>
                     
                     <!-- Zona -->
                     <div class="mb-3">
@@ -121,66 +127,86 @@ $nonce = wp_create_nonce('update_profile_nonce');
     }
 
     function saveChanges() {
-        const profileImage = document.getElementById('profileImage').value;
-        const fileName = profileImage.split('\\').pop().split('/').pop().trim();
+        // const image = document.getElementById('profileImage').value;
+        const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        const image = document.getElementById('profileImage');
+        // const fileName = profileImage.split('\\').pop().split('/').pop().trim();
+        const profileImage = image.files[0]; 
         const name = document.getElementById('name').value.trim();
+        const descripcion = document.getElementById('descripcion').value.trim();
         const zona = document.getElementById('zona').value.trim();
         const email = document.getElementById('email').value.trim();
         const phone = document.getElementById('phone').value.trim();
         const user_id = document.getElementById('user_id_group').value.trim();
-
+        const formData = new FormData();
+        
+        formData.append('security', nonce);
+        formData.append('action', 'update_profile');
         // Aquí puedes procesar los datos, enviarlos al servidor, etc.
-        console.log('Nombre:', name);
-        console.log('Zona:', zona);
-        console.log('Email:', email);
-        console.log('Teléfono:', phone);
+        // console.log('Nombre:', name);
+        // console.log('Zona:', zona);
+        // console.log('Email:', email);
+        // console.log('Teléfono:', phone);
       
         if (!validateEmail(email)) {
             alert('Ingrese un email válido');
         }else{
             let arrUpdate = {}; 
             
+            // arrUpdate.user_id = user_id;
+            formData.append('user_id_group', user_id);
 
-            arrUpdate.user_id = user_id;
-            
-            if (fileName != '') {
-                arrUpdate.fileName = fileName;
+            if (profileImage) {
+                if (validImageTypes.includes(profileImage.type)) {
+                    formData.append('profileImage', profileImage); 
+                }else{
+                    alert("Error en el formato del Archivo");
+                }
             }
     
             if (name != '<?=$data_music_group[0]->name?>' && name != '') {
-                arrUpdate.name = name;
+                // arrUpdate.name = name;
+                formData.append('name', name);
+            }
+
+            if (descripcion != '<?=$data_music_group[0]->description?>' && descripcion != '') {
+                formData.append('descripcion', descripcion);
             }
         
             if (zona != '<?=$data_music_group[0]->id_zone?>' && zona != '') {
-                arrUpdate.id_zone = zona;
+                // arrUpdate.id_zone = zona;
+                formData.append('id_zone', zona);
             }
         
             if (email != '<?=$data_music_group[0]->email?>' && email != '') {
-                arrUpdate.email = email;
+                // arrUpdate.email = email;
+                formData.append('email', email);
             }
     
             if (phone != '<?=$data_music_group[0]->phone?>' && phone != '') {
-                arrUpdate.phone = phone;
+                // arrUpdate.phone = phone;
+                formData.append('phone', phone);
             }
-    
-            console.log(arrUpdate);
-            
+
+            formData.forEach((value,key) => {
+                console.log(key,value);
+                
+            });
+            // return;
             jQuery.ajax({
                 url: ajaxurl,
                 type: 'POST',
-                data: {
-                    action: 'update_profile',
-                    security: nonce,
-                    data: arrUpdate
-                },  
+                data: formData,
+                contentType: false,
+                processData: false,
                 success: function(response) {
-                    alert(response.data);
                     console.log(response);
                     location.reload();
                 },
+                error: function(xhr, status, error) {
+                    console.log('Error:', error);
+                }
             });
-
-            
 
             // Cerrar el modal
             var modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
