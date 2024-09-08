@@ -1,5 +1,5 @@
 <?php
-$data_music_group = $wpdb->get_results($wpdb->prepare("SELECT a.id user_id,b.photo,b.name,b.description,b.region, b.email, b.phone, c.name_zone, c.id id_zone FROM {$wpdb->prefix}users a INNER JOIN {$wpdb->prefix}gm_groups b on a.ID = b.user_id INNER JOIN {$wpdb->prefix}gm_zones c on b.id_zone = c.id where a.id = %d", $user_id));
+$data_music_group = $wpdb->get_results($wpdb->prepare("SELECT a.id user_id,b.photo,b.name,b.description, b.email, b.phone, c.name_zone, c.id id_zone FROM {$wpdb->prefix}users a INNER JOIN {$wpdb->prefix}gm_groups b on a.ID = b.user_id INNER JOIN {$wpdb->prefix}gm_zones c on b.id_zone = c.id where a.id = %d", $user_id));
 $zones = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gm_zones WHERE status = 1");
 
 if ($wpdb->last_error) {
