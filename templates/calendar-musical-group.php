@@ -29,6 +29,22 @@ $gm_availability_nonce = wp_create_nonce('gm_availability_action');
     <div id="calendar-dates"></div>
 </div>
 
+<!-- Leyenda -->
+<div class="leyenda-container">
+    <h6 class="leyenda-title">Leyenda</h6>
+    <ul class="leyenda-list">
+        <li class="leyenda-item">
+            Día contratado parcialmente: <span class="parcial leyenda-icon">■</span>
+        </li>
+        <li class="leyenda-item">
+            Día contratado completamente: <span class="allComplet leyenda-icon">■</span>
+        </li>
+        <li class="leyenda-item">
+            Día sin contratación: <span class="allAvailable leyenda-icon">■</span>
+        </li>
+    </ul>
+</div>
+
 <div id="availability-popup" class="popup" role="dialog" aria-labelledby="popup-title" aria-hidden="true">
     <div class="popup-content">
         <span class="close-popup" role="button" tabindex="0">&times;</span>
