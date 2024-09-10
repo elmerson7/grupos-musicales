@@ -975,6 +975,12 @@ function gm_filter_block_navigation($block_content, $block) {
             $logout_url = wp_logout_url(home_url());
             $logout_link = '<li class="wp-block-pages-list__item wp-block-navigation-item"><a href="' . esc_url($logout_url) . '" style="color: red;">Salir</a></li>';
             $block_content = preg_replace('/(<ul class="wp-block-page-list">.*?)(<\/ul>)/is', '$1' . $logout_link . '$2', $block_content);
+        }else {
+            $pages_to_hide_logged_out = ['calendario-de-disponibilidad', 'formulario-de-disponibilidades', 'perfil-grupo-musical'];
+
+            foreach ($pages_to_hide_logged_out as $slug) {
+                $block_content = preg_replace('/<li[^>]*>\s*<a[^>]*href="[^"]*\/' . preg_quote($slug, '/') . '[^"]*".*?<\/a>.*?<\/li>/is', '', $block_content);
+            }
         }
     }
     return $block_content;
