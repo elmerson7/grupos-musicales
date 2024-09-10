@@ -329,6 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (dayAvailabilities.length > 0) {
                     const hasAvailable = dayAvailabilities.some(avail => avail.contractor_name === null);
                     const hasContracted = dayAvailabilities.some(avail => avail.contractor_name !== null);
+                    
                     if (hasAvailable && hasContracted) {
                         dateCell.classList.add('mixed');
                     } else if (hasContracted) {

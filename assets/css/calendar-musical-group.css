@@ -243,3 +243,43 @@
     background-color: #d4edda;
     color: #155724;
 }
+
+.leyenda-container {
+    font-family: 'Arial', sans-serif;
+    margin: 20px 0;
+}
+
+.leyenda-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.leyenda-list {
+    list-style-type: none; /* Eliminar la decoración de la lista */
+    padding: 0;
+    margin: 0;
+}
+
+.leyenda-item {
+    margin-bottom: 5px;
+    font-size: 1rem;
+}
+
+.leyenda-icon {
+    font-size: 1.5rem; /* Ajuste para mantener consistencia */
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.parcial {
+    color: #FF9800;
+}
+
+.allComplet {
+    color: #9C27B0;
+}
+
+.allAvailable {
+    color: #4CAF50;
+}
