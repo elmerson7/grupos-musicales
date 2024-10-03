@@ -1,17 +1,20 @@
 <?php
 global $wpdb;
 
-$musical_groups = $wpdb->get_results("
-    SELECT a.*, b.name_zone 
-    FROM {$wpdb->prefix}gm_groups a 
-    LEFT JOIN {$wpdb->prefix}gm_zones b ON a.id_zone = b.id
-");
+// $musical_groups = $wpdb->get_results("
+//     SELECT a.*, b.name_zone 
+//     FROM {$wpdb->prefix}gm_groups a 
+//     LEFT JOIN {$wpdb->prefix}gm_zones b ON a.id_zone = b.id
+// ");
+$musical_groups = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gm_groups");
 
 $zones = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gm_zones WHERE status = 1");
 // echo "<pre>";
-// print_r($zones);
+// print_r($musical_groups);
 // echo "<pre>";
 ?>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 <div class="wrap">
     <h1>Gestionar Grupos Musicales</h1>
 
@@ -27,19 +30,30 @@ $zones = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gm_zones WHERE status 
                         <th>Descripción</th>
                         <th>Email</th>
                         <th>Teléfono</th>
-                        <th>Zona</th>
+                        <th>Zona(s)</th>
+                        <th>Duración Show</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($musical_groups as $group): ?>
+                        <?php
+                            $list_ids = $group->id_zone;
+                            $name_zones = $wpdb->get_results("SELECT name_zone FROM {$wpdb->prefix}gm_zones WHERE id IN ($list_ids)");
+                            $arr_zones = [];
+                            foreach ($name_zones as $zone) {
+                                $arr_zones[] = $zone->name_zone;
+                            }
+                            $list_zones = implode(' ,',$arr_zones);                            
+                        ?>
                         <tr>
                             <td><?php echo esc_html($group->id); ?></td>
                             <td><?php echo esc_html($group->name); ?></td>
                             <td><?php echo esc_html($group->description); ?></td>
                             <td><?php echo esc_html($group->email); ?></td>
                             <td><?php echo esc_html($group->phone); ?></td>
-                            <td><?php echo esc_html($group->name_zone); ?></td> <!-- Cambiado para mostrar el nombre de la zona -->
+                            <td><?php echo esc_html($list_zones); ?></td> <!-- Cambiado para mostrar el nombre de la zona -->
+                            <td><?php echo esc_html($group->duration). " minutos"; ?></td>
                             <td>
                                 <a href="#" class="edit-group" data-id="<?php echo esc_attr($group->id); ?>">Editar</a> |
                                 <a href="#" class="delete-group" data-id="<?php echo esc_attr($group->id); ?>">Eliminar</a>
@@ -80,11 +94,27 @@ $zones = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gm_zones WHERE status 
                     </div>
                     <div class="form-group">
                         <label id="lblRegion" for="zone">Zona geográfica</label>
-                        <select name="zone" id="zone" require>
-                        <option value="" selected disabled>--Selecciona Zona--</option>
+                        <select name="zone[]" id="zone" multiple="multiple" required>
+                        <option value="" disabled>--Selecciona Zona--</option>
                         <?php foreach ($zones as $zone): ?>
                             <option value="<?=$zone->id?>"><?=$zone->name_zone?></option>
                         <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="duracion" class="form-label">Duración del Show</label>
+                        <select name="duracion" id="duracion" class="form-select" required>
+                            <option value="" selected disabled>--Selecciona Duracion--</option>
+                            <option value="45">45min</option>
+                            <option value="60">1h</option>
+                            <option value="75">1h 15min</option>
+                            <option value="90">1h 30min</option>
+                            <option value="105">1h 45min</option>
+                            <option value="120">2h</option>
+                            <option value="135">2h 15min</option>
+                            <option value="150">2h 30min</option>
+                            <option value="165">2h 45min</option>
+                            <option value="180">3h</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -128,15 +158,34 @@ $zones = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gm_zones WHERE status 
                 <label for="edit_description">Descripción</label>
                 <textarea id="edit_description" required></textarea>
             </div>
+
             <div class="form-group">
                 <label for="edit_zone">Zona geográfica</label>
-                <select id="edit_zone" required>
-                    <option value="" disabled>--Selecciona Zona--</option>
+                <select id="edit_zone" name="edit_zone[]" multiple="multiple" required>
+                    <!-- <option value="" disabled>--Selecciona Zona--</option> -->
                     <?php foreach ($zones as $zone): ?>
                         <option value="<?= esc_attr($zone->id) ?>"><?= esc_html($zone->name_zone) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
+
+            <div class="form-group">
+                <label for="edit_duration">Duración</label>
+                <select name="edit_duration" id="edit_duration" class="form-select" required>
+                    <option value="" selected disabled>--Selecciona Duracion--</option>
+                    <option value="45">45min</option>
+                    <option value="60">1h</option>
+                    <option value="75">1h 15min</option>
+                    <option value="90">1h 30min</option>
+                    <option value="105">1h 45min</option>
+                    <option value="120">2h</option>
+                    <option value="135">2h 15min</option>
+                    <option value="150">2h 30min</option>
+                    <option value="165">2h 45min</option>
+                    <option value="180">3h</option>
+                </select>
+            </div>
+
             <div class="form-group">
                 <label for="edit_phone">Teléfono</label>
                 <input type="text" id="edit_phone" required>
@@ -154,14 +203,15 @@ $zones = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gm_zones WHERE status 
         </form>
     </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <?php
 // Incluir los recursos CSS y JS específicos
 wp_enqueue_style('gm_availabilities_page_css', plugin_dir_url(__FILE__) . '../assets/css/groups-page.css');
+wp_enqueue_style('datatables-css', 'https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css');
 
 wp_enqueue_script('gm_availabilities_page_js', plugin_dir_url(__FILE__) . '../assets/js/groups-page.js', array('jquery'), null, true);
-
-wp_enqueue_style('datatables-css', 'https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css');
 wp_enqueue_script('datatables-js', 'https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js', array('jquery'), null, true);
 
 $gm_group_nonce = wp_create_nonce('gm_group_action');
@@ -175,6 +225,22 @@ $gm_group_nonce = wp_create_nonce('gm_group_action');
             },
             "order": [[0, 'desc']],
         });
+
+        $('#zone').select2({
+            placeholder: "--Seleccione Zona--",
+        });
+
+        $('#editGroupModal').on('shown.bs.modal', function () {
+            $('#edit_zone').select2({
+                dropdownParent: $('#editGroupModal'),
+                placeholder: "--Seleccione Zona--",
+            });
+        });
+
+        $('#editGroupModal').on('hidden.bs.modal', function () {
+        // Resetear el formulario
+        $('#editGroupModal')[0].reset();
     });
 
+    });
 </script>

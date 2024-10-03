@@ -41,7 +41,7 @@ $contractors = $wpdb->get_results("
         </div>
 
         <div id="createAvailabilityContainer">
-            <h2>Crear Nuevo Cnotratante</h2>
+            <h2>Crear Nuevo Contratante</h2>
             <form method="POST" action="" id="gm-registration-form">
                 <?php wp_nonce_field('gm_register_action', 'gm_register_nonce'); ?>
                 <div class="form-container">

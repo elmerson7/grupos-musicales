@@ -260,7 +260,7 @@ function gm_groups_page_create_group() {
     check_ajax_referer('gm_group_action', '_wpnonce');
 
     if (
-        isset($_POST['username'], $_POST['email'], $_POST['password'], $_POST['name'], $_POST['description'], $_POST['zone'], $_POST['phone'], $_POST['email_contact']) && 
+        isset($_POST['username'], $_POST['email'], $_POST['password'], $_POST['name'], $_POST['description'], $_POST['zone'],  $_POST['duration'],$_POST['phone'], $_POST['email_contact']) && 
         !empty($_FILES['photo'])
     ) {
         global $wpdb;
@@ -270,7 +270,8 @@ function gm_groups_page_create_group() {
         $password = sanitize_text_field($_POST['password']);
         $name = sanitize_text_field($_POST['name']);
         $description = sanitize_textarea_field($_POST['description']);
-        $zone = intval($_POST['zone']);
+        $zone = sanitize_text_field($_POST['zone']);
+        $duration = intval($_POST['duration']);
         $phone = sanitize_text_field($_POST['phone']);
         $email_contact = sanitize_email($_POST['email_contact']);
         $role = 'gm_group';
@@ -305,6 +306,7 @@ function gm_groups_page_create_group() {
                 'name' => $name,
                 'description' => $description,
                 'id_zone' => $zone,
+                'duration' => $duration,
                 'phone' => $phone,
                 'email' => $email_contact,
                 'photo' => $upload['url']
@@ -351,7 +353,8 @@ function gm_groups_page_update_group() {
         $group_id = intval($_POST['group_id']);
         $name = sanitize_text_field($_POST['name']);
         $description = sanitize_textarea_field($_POST['description']);
-        $zone = intval($_POST['zone']);
+        $zone = sanitize_text_field($_POST['zone']);
+        $duration = intval($_POST['duration']);
         $phone = sanitize_text_field($_POST['phone']);
         $email_contact = sanitize_email($_POST['email_contact']);
 
@@ -371,6 +374,7 @@ function gm_groups_page_update_group() {
             'name' => $name,
             'description' => $description,
             'id_zone' => $zone,
+            'duration' => $duration,
             'phone' => $phone,
             'email' => $email_contact,
         ];
@@ -588,7 +592,7 @@ add_action('wp_ajax_gm_get_availability_form', 'gm_get_availability_form');
 
 function gm_handle_availability_ajax() {
     check_ajax_referer('gm_availability_action', 'gm_availability_nonce');
-
+    // wp_send_json_success($_POST);
     global $wpdb;
     $date = sanitize_text_field($_POST['date']);
     $start_time = sanitize_text_field($_POST['start_time']);
@@ -597,7 +601,7 @@ function gm_handle_availability_ajax() {
     $user_id = get_current_user_id();
     $event = isset($_POST['event']) ? sanitize_text_field($_POST['event']) : 0;
     $endDate = sanitize_text_field($_POST['endDate']) ? sanitize_text_field($_POST['endDate']) : null;
-
+    $zone = isset($_POST['zone']) ? $_POST['zone'] : 0;
     $group_id = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$wpdb->prefix}gm_groups WHERE user_id = %d", $user_id));
 
     if (!$group_id) {
@@ -659,6 +663,7 @@ function gm_handle_availability_ajax() {
                 'date' => $calculatedDate->format('Y-m-d H:i:s'),
                 'end_time' => $calculatedDate->format('Y-m-d') . ' ' . $end_time,
                 'all_day' => $all_day,
+                'id_zone' => $zone
             ];
 
             $result = $wpdb->insert("{$wpdb->prefix}gm_availabilities", $data);
@@ -677,6 +682,7 @@ function gm_handle_availability_ajax() {
             'date' => $date . ' ' . $start_time,
             'end_time' => $date . ' ' . $end_time,
             'all_day' => $all_day,
+            'id_zone' => $zone
         ];
         $result = $wpdb->insert("{$wpdb->prefix}gm_availabilities", $data);
         if ($result === false) {
@@ -720,7 +726,7 @@ function gm_get_groups() {
 function gm_get_availabilities() {
     global $wpdb;
     $user_id = get_current_user_id();
-    return $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gm_availabilities WHERE group_id = %d", $user_id));
+    return $wpdb->get_results($wpdb->prepare("SELECT b.* FROM {$wpdb->prefix}gm_availabilities a LEFT JOIN {$wpdb->prefix}gm_zones b WHERE a.group_id = %d", $user_id));
 }
 
 function gm_get_availability($availability_id) {
@@ -907,9 +913,10 @@ function gm_get_availabilities_ajax() {
 
     // Realizar la consulta para obtener todas las disponibilidades
     $availabilities = $wpdb->get_results($wpdb->prepare("
-        SELECT a.*, c.contractor_name 
+        SELECT a.*, c.contractor_name, z.name_zone
         FROM {$wpdb->prefix}gm_availabilities a 
         LEFT JOIN {$wpdb->prefix}gm_contracts c ON a.id = c.availability_id 
+        LEFT JOIN {$wpdb->prefix}gm_zones z ON a.id_zone = z.id 
         WHERE a.group_id = %d
     ", $group_id));
 
@@ -933,13 +940,15 @@ function gm_get_contractor_availabilities_ajax() {
 
     // Realizar la consulta para obtener todas las disponibilidades junto con la información del grupo musical y las contrataciones
     $availabilities = $wpdb->get_results("
-        SELECT a.*, c.contractor_name, g.photo, g.description, g.id_zone, g.name AS group_name, d.name_zone 
+        SELECT a.*, c.contractor_name, g.photo, g.description, g.duration, a.id_zone, g.name AS group_name, d.name_zone 
         FROM {$wpdb->prefix}gm_availabilities a 
         JOIN {$wpdb->prefix}gm_groups g ON a.group_id = g.id
         LEFT JOIN {$wpdb->prefix}gm_contracts c ON a.id = c.availability_id
-        LEFT JOIN {$wpdb->prefix}gm_zones d ON d.id = g.id_zone
+        LEFT JOIN {$wpdb->prefix}gm_zones d ON d.id = a.id_zone
         WHERE d.status = 1
     ");
+    // wp_send_json_success($wpdb->last_query);
+
 
     if (empty($availabilities)) {
         wp_send_json_error('No se encontraron disponibilidades.');
@@ -1046,7 +1055,8 @@ function handle_update_profile() {
     }
 
     if (isset($data['id_zone']) && $data['id_zone'] !== '') {
-        $update_data['id_zone'] = intval($data['id_zone']);
+        // $update_data['id_zone'] = intval($data['id_zone']);
+        $update_data['id_zone'] = sanitize_text_field($data['id_zone']);
     }
 
     if (isset($data['email']) && $data['email'] !== '') {
@@ -1061,13 +1071,17 @@ function handle_update_profile() {
         $update_data['phone'] = sanitize_text_field($data['phone']);
     }
 
+    if (isset($data['duration']) && $data['duration'] !== '') {
+        $update_data['duration'] = intval($data['duration']);
+    }
+
     // Actualizar la base de datos solo si hay datos para actualizar
     if (!empty($update_data) && $user_id > 0) {
         $wpdb->update(
             "{$wpdb->prefix}gm_groups",
             $update_data,
             array('user_id' => $user_id),
-            array('%s', '%s', '%d', '%s', '%s', '%s'), 
+            array('%s', '%s', '%s', '%s', '%s', '%s', '%d'), 
             array('%d')
         );
         // wp_send_json_success($wpdb->last_query);
@@ -1077,6 +1091,36 @@ function handle_update_profile() {
     }
 }
 
+function gm_extract_zones_per_group() {
+    // Verificar el nonce para mayor seguridad
+    check_ajax_referer('gm_availability_action', '_wpnonce');
 
+    // Obtener el ID del grupo enviado por AJAX
+    $group_id = intval($_POST['group_id']);
 
+    global $wpdb;
 
+    // Realizar la consulta a la base de datos (ajusta la consulta según tus necesidades)
+    $zones = $wpdb->get_results($wpdb->prepare("
+        SELECT id_zone FROM {$wpdb->prefix}gm_groups
+        WHERE id = %d
+    ", $group_id));
+    $ids_zones = $zones[0]->id_zone;
+    // wp_send_json_success($zones[0]->id_zone);
+    
+    // Verificar si se encontraron zonas
+    if ($zones) {
+        // Retornar respuesta exitosa con los datos
+        $availables_zones =  $wpdb->get_results($wpdb->prepare("
+        SELECT id,name_zone FROM {$wpdb->prefix}gm_zones
+        WHERE id IN ($ids_zones)"));
+        wp_send_json_success($availables_zones);
+        // wp_send_json_success($wpdb->last_query);
+    } else {
+        // Retornar respuesta de error
+        wp_send_json_error('No se encontraron zonas para el grupo especificado.');
+    }
+}
+
+// Registrar la acción AJAX para usuarios logueados y no logueados
+add_action('wp_ajax_gm_extract_zones_per_group', 'gm_extract_zones_per_group');

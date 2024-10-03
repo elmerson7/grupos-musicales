@@ -3,11 +3,12 @@ global $wpdb;
 
 // Obtener todas las disponibilidades
 // $availabilities = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gm_availabilities");
-$availabilities = $wpdb->get_results("SELECT b.name name_group,a.* FROM {$wpdb->prefix}gm_availabilities a INNER JOIN {$wpdb->prefix}gm_groups b ON a .group_id = b.id ORDER BY a.id DESC");
+$availabilities = $wpdb->get_results("SELECT b.name name_group,a.*, c.name_zone FROM {$wpdb->prefix}gm_availabilities a INNER JOIN {$wpdb->prefix}gm_groups b ON a .group_id = b.id LEFT JOIN {$wpdb->prefix}gm_zones c ON a.id_zone = c.id ORDER BY a.id DESC");
 
 // echo "<pre>";
 // print_r($availabilities);
 // echo "</pre>";
+// echo '<pre>' . $wpdb->last_query . '</pre>';
 
 // Obtener todos los grupos musicales
 $musical_groups = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}gm_groups");
@@ -25,6 +26,7 @@ $musical_groups = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}gm_gro
                     <tr>
                         <th>ID</th>
                         <th>Grupo Musical</th>
+                        <th>Zona</th>
                         <th>Fecha de Inicio</th>
                         <th>Hora de Fin</th>
                         <th>Todo el Día</th>
@@ -37,6 +39,7 @@ $musical_groups = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}gm_gro
                         <tr>
                             <td><?php echo esc_html($availability->id); ?></td>
                             <td><?php echo esc_html($availability->name_group); ?></td>
+                            <td><?php echo esc_html($availability->name_zone); ?></td>
                             <td><?php echo esc_html($availability->date); ?></td>
                             <td><?php echo esc_html($availability->end_time); ?></td>
                             <td><?php echo esc_html($availability->all_day ? 'Sí' : 'No'); ?></td>
@@ -58,11 +61,20 @@ $musical_groups = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}gm_gro
                 <div class="form-group">
                     <label for="create_group_id">Grupo Musical</label>
                     <select id="create_group_id" required>
+                        <option value="" disabled selected>--Selecciona Grupo Musical--</option>
                         <?php foreach ($musical_groups as $group): ?>
                             <option value="<?php echo esc_attr($group->id); ?>"><?php echo esc_html($group->name); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
+
+                <div class="form-group">
+                    <label for="create_zone">Zona Geográfica</label>
+                    <select id="create_zone" required>
+                            <option value="">--Selecciona Zona--</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label for="create_date">Fecha de Inicio</label>
                     <input type="datetime-local" id="create_date" required>
@@ -88,6 +100,14 @@ $musical_groups = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}gm_gro
         <h2>Editar Disponibilidad</h2>
         <form id="edit-availability-form">
             <input type="hidden" id="edit_availability_id">
+
+            <div class="form-group">
+                <label for="zone_edit">Zona Geográfica</label>
+                <select id="zone_edit" required>
+                        <!-- <option value="">--Selecciona Zona--</option> -->
+                </select>
+            </div>
+
             <div class="form-group">
                 <label for="edit_date">Fecha de Inicio</label>
                 <input type="datetime-local" id="edit_date" required>

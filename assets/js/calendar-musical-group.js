@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', function() {
             function(response) {
                 if (response.success) {
                     availabilities = response.data;
+                    // console.log(availabilities);
+                    
                     loadCalendar(); // Cargar el calendario con las disponibilidades obtenidas
                 } else {
                     alert('Error al cargar disponibilidades: ' + response.data);
@@ -44,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <table class="availability-table">
                     <thead>
                         <tr>
+                            <th>Zona</th>
                             <th>Inicio</th>
                             <th>Fin</th>
                             <th>Acciones</th>
@@ -52,6 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <tbody>
                         ${dayAvailabilities.map(availability => `
                             <tr>
+                                <td>${availability.name_zone}</td>
                                 <td>${new Date(availability.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                                 <td>${new Date(availability.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                                 <td>

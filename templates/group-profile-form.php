@@ -76,8 +76,8 @@ $zones = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gm_zone
         </div>
         <div class="form-group">
             <label for="zone">Zona geográfica</label>
-            <select name="zone" id="zone" required>
-            <option value="" selected disabled>--Selecciona Zona--</option>
+            <select name="zone[]" id="zone" multiple="multiple" required>
+            <option value="" disabled>--Selecciona Zona--</option>
             <?php foreach ($zones as $zone): ?>
                 <option value="<?=$zone->id?>"><?=$zone->name_zone?></option>
             <?php endforeach; ?>
@@ -94,6 +94,22 @@ $zones = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gm_zone
         <div class="form-group">
             <label for="email">Email de contacto</label>
             <input type="email" name="email" id="email" required>
+        </div>
+        <div class="form-group">
+        <label for="duracion">Duración del Show</label>
+            <select name="duracion" id="duracion" required>
+            <option value="" disabled>--Selecciona Duracion--</option>
+            <option value="45">45min</option>
+            <option value="60">1h</option>
+            <option value="75">1h 15min</option>
+            <option value="90">1h 30min</option>
+            <option value="105">1h 45min</option>
+            <option value="120">2h</option>
+            <option value="135">2h 15min</option>
+            <option value="150">2h 30min</option>
+            <option value="165">2h 45min</option>
+            <option value="180">3h</option>
+            </select>
         </div>
         <div class="form-group">
             <input type="submit" name="submit_group_profile" value="Guardar">
@@ -113,6 +129,18 @@ $zones = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gm_zone
 
 <!-- Importar CSS -->
 <link rel="stylesheet" type="text/css" href="<?php echo esc_url(plugin_dir_url(__FILE__) . '../assets/css/group-profile-form.css'); ?>">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 <!-- Importar JavaScript -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="<?php echo esc_url(plugin_dir_url(__FILE__) . '../assets/js/group-profile-form.js'); ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    jQuery(document).ready(function() {
+        $('#zone').select2({
+            placeholder: "--Seleccione Zona--",
+            allowClear: true
+        });
+    });
+</script>

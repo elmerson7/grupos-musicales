@@ -33,6 +33,7 @@ function gm_handle_group_profile_form() {
     if (isset($_POST['submit_group_profile'])) {
         global $wpdb;
 
+
         $user_id = get_current_user_id();
         $group_exists = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}gm_groups WHERE user_id = %d", $user_id));
 
@@ -44,11 +45,14 @@ function gm_handle_group_profile_form() {
 
         $name = sanitize_text_field($_POST['name']);
         $description = sanitize_textarea_field($_POST['description']);
-        $zone = intval($_POST['zone']);
+        // $zone = intval($_POST['zone']);
+        $zone = implode(",",$_POST['zone']);
         $phone = sanitize_text_field($_POST['phone']);
         $email = sanitize_email($_POST['email']);
         $photo = '';
-
+        $duracion = isset($_POST['duracion']) ? $_POST['duracion'] : 0;
+        // wp_send_json_success($zone);
+        // exit();
         if (!empty($_FILES['photo']['name'])) {
             $uploaded = wp_upload_bits($_FILES['photo']['name'], null, file_get_contents($_FILES['photo']['tmp_name']));
             if (!$uploaded['error']) {
@@ -63,7 +67,8 @@ function gm_handle_group_profile_form() {
             'description' => $description,
             'id_zone' => $zone,
             'email' => $email,
-            'phone' => $phone
+            'phone' => $phone,
+            'duration' => $duracion
         ];
 
         $result = gm_add_group($data);
