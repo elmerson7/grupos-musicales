@@ -1,3 +1,16 @@
+<?php
+    global $wpdb;
+    // echo '<pre>';
+    // print_r(get_defined_vars());
+    // echo '</pre>';
+    $user_id = get_current_user_id();
+    $group_zones = $wpdb->get_results($wpdb->prepare("SELECT id_zone,duration FROM {$wpdb->prefix}gm_groups WHERE user_id = %d", $user_id));
+
+    $id_zone = $group_zones[0]->id_zone;
+    $duration = $group_zones[0]->duration;
+
+    $zones = $wpdb   ->get_results($wpdb->prepare("SELECT id,name_zone FROM {$wpdb->prefix}gm_zones WHERE id IN ($id_zone)"));
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,6 +31,17 @@
     <div class="form-group">
         <label for="date">Fecha</label>
         <input type="date" name="date" id="date" required aria-describedby="date-error">
+        <span id="date-error" class="gm-error">Este campo es obligatorio.</span>
+    </div>
+
+    <div class="form-group">
+        <label for="zone">Zona geográfica</label>
+            <select name="zone" id="zone" required>
+            <option value="" selected disabled>--Selecciona Zona--</option>
+            <?php foreach ($zones as $zone): ?>
+                <option value="<?=$zone->id?>"><?=$zone->name_zone?></option>
+            <?php endforeach; ?>
+        </select>
         <span id="date-error" class="gm-error">Este campo es obligatorio.</span>
     </div>
     
@@ -123,12 +147,30 @@ btnAllDay.addEventListener('change', function(){
     }
 });
 
+function convertirAMinutos(hora) {
+    const [horas, minutos] = hora.split(':').map(Number);
+    return horas * 60 + minutos;
+}
 
 jQuery(document).ready(function($) {
-    let divFechaFin = document.getElementById('divFechaFin');
+    // let divFechaFin = document.getElementById('divFechaFin');
+    // let startTime = document.getElementById('start_time');
+    // let endTime = document.getElementById('end_time');
     $('#gm-availability-form').submit(function(e) {
         e.preventDefault();
-        
+        // console.log(startTime.value,endTime.value);
+        const minutosHora1 = convertirAMinutos(startTime.value);
+        const minutosHora2 = convertirAMinutos(endTime.value);
+        const diferenciaMinutos = minutosHora2 - minutosHora1;
+        const duration = <?=$duration?>;
+        // console.log(duration);
+        if (duration > diferenciaMinutos) {
+            alert("El tiempo seleccionado excede a la duración del Show")
+            return;
+        }
+        // console.log(`Han transcurrido ${diferenciaMinutos} minutos entre ${startTime.value} y ${endTime.value}`);
+
+        // return
         var formData = $(this).serialize(); // Captura todos los datos del formulario
             
         if(btnAllDay.checked){

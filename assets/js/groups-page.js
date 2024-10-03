@@ -11,7 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const nameInput = document.getElementById('name');
     const descriptionInput = document.getElementById('description');
     const zoneInput = document.getElementById('zone');
+    
     const phoneInput = document.getElementById('phone');
+    const durationInput = document.getElementById('duracion');
     const photoInput = document.getElementById('photo');
     const emailContactInput = document.getElementById('email_contact');
     const gmRegisterNonce = gm_group_nonce;
@@ -24,7 +26,14 @@ document.addEventListener('DOMContentLoaded', function() {
             editingGroupId = this.dataset.id;
             fetchGroupData(editingGroupId);
             editModal.style.display = 'block';
+            
+            $('#edit_zone').select2({
+                dropdownParent: $('#editGroupModal'),
+                placeholder: "--Seleccione Zona--",
+            });
+
         });
+        
     });
 
     document.querySelectorAll('.delete-group').forEach(button => {
@@ -44,11 +53,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const groupId = document.getElementById('edit_group_id').value;
         const name = document.getElementById('edit_name').value.trim();
         const description = document.getElementById('edit_description').value.trim();
-        const zone = document.getElementById('edit_zone').value;
+        
+        const zone = document.getElementById('edit_zone');
+        const zoneOptions = Array.from(zone.selectedOptions);
+        const zoneSelectedValues = zoneOptions.map(option => option.value);
+        const stringZones = zoneSelectedValues.join(',');
+
+        const duration = document.getElementById('edit_duration').value;
         const phone = document.getElementById('edit_phone').value.trim();
         const emailContact = document.getElementById('edit_email_contact').value.trim();
         const photo = document.getElementById('edit_photo').files[0];
-    
+        // console.log(stringZones,duration);
+        
         // Validaciones
         if (name.length === 0) {
             showError('El nombre artístico no puede estar vacío.');
@@ -60,8 +76,13 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
     
-        if (!zone) {
-            showError('Por favor, selecciona una zona geográfica.');
+        if (stringZones.length === 0) {
+            showError('Por favor, selecciona Zona geográfica.');
+            return;
+        }
+
+        if (duration.length === 0) {
+            showError('Por favor, seleccione duración del Show.');
             return;
         }
     
@@ -82,7 +103,8 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('group_id', groupId);
         formData.append('name', name);
         formData.append('description', description);
-        formData.append('zone', zone);
+        formData.append('zone', stringZones);
+        formData.append('duration', duration);
         formData.append('phone', phone);
         if (photo) {
             formData.append('photo', photo);
@@ -116,8 +138,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const password = passwordInput.value;
         const name = nameInput.value.trim();
         const description = descriptionInput.value.trim();
-        const zone = zoneInput.value;
+        // const zone = zoneInput.value;
+        const zoneOptions = Array.from(zoneInput.selectedOptions);
+        const zoneSelectedValues = zoneOptions.map(option => option.value);
+        const stringZones = zoneSelectedValues.join(',');
+
         const phone = phoneInput.value.trim();
+        const duration = durationInput.value.trim();
         const photo = photoInput.files[0];
         const emailContact = emailContactInput.value.trim();
 
@@ -147,13 +174,19 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        if (!zone) {
-            showError('Por favor, selecciona una zona geográfica.');
+        if (stringZones.length === 0) {
+            showError('Por favor, selecciona una Zona geográfica.');
             return;
         }
 
+        
         if (phone.length === 0) {
             showError('El teléfono no puede estar vacío.');
+            return;
+        }
+        
+        if (duration.length === 0) {
+            showError('Por favor, selecciona una Zona geográfica.');
             return;
         }
 
@@ -166,6 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showError('Por favor, introduce un correo electrónico de contacto válido.');
             return;
         }
+        // return;
 
         // Crear objeto FormData para enviar archivos
         const formData = new FormData();
@@ -176,11 +210,13 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('password', password);
         formData.append('name', name);
         formData.append('description', description);
-        formData.append('zone', zone);
+        formData.append('zone', stringZones);
         formData.append('phone', phone);
+        formData.append('duration', duration);
         formData.append('photo', photo);
         formData.append('email_contact', emailContact);
 
+        
         // Enviar solicitud AJAX
         jQuery.ajax({
             url: ajaxurl,
@@ -213,10 +249,25 @@ document.addEventListener('DOMContentLoaded', function() {
             function(response) {
                 if (response.success) {
                     const group = response.data;
+                    
                     document.getElementById('edit_group_id').value = group.id;
                     document.getElementById('edit_name').value = group.name;
                     document.getElementById('edit_description').value = group.description;
-                    document.getElementById('edit_zone').value = group.id_zone;
+                    let zonesSelected = document.getElementById('edit_zone');
+                    zonesSelected.selectedIndex = -1;
+                    // var valoresPredeterminados = "";
+                    valoresPredeterminados = group.id_zone.split(',').map(id => id.trim());
+                    // console.log(valoresPredeterminados);
+
+                    for (let i = 0; i < zonesSelected.options.length; i++) {
+                        if (valoresPredeterminados.includes(zonesSelected.options[i].value)) {
+                            zonesSelected.options[i].selected = true; // Marca la opción como seleccionada
+                        }
+                    }
+                
+                    $(zonesSelected).trigger('change');
+
+                    document.getElementById('edit_duration').value = group.duration;
                     document.getElementById('edit_phone').value = group.phone;
                     document.getElementById('edit_email_contact').value = group.email;
     

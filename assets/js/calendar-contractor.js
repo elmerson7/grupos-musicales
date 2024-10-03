@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', function() {
             function(response) {
                 if (response.success) {
                     availabilities = response.data;
+                    console.log(availabilities);
+                    
                     loadCalendar(); // Cargar el calendario con las disponibilidades obtenidas
                 } else {
                     alert('Error al cargar disponibilidades: ' + response.data);
@@ -151,6 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <p><strong>Grupo Musical:</strong> ${availability.group_name}</p>
                                 <p><strong>Descripción:</strong> ${availability.description}</p>
                                 <p><strong>Región:</strong> ${availability.name_zone}</p>
+                                <p><strong>Duración del Show:</strong> ${availability.duration} minutos</p>
                             </div>
                         </div>
                         <div class="availability-details"> <!-- Contenedor flexible -->

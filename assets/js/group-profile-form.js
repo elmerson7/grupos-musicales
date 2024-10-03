@@ -3,6 +3,7 @@ document.getElementById('gm-group-profile-form').addEventListener('submit', func
     var email = document.getElementById('email').value.trim();
     var fileInput = document.getElementById('photo');
     var zona = document.getElementById('zona');
+    var duracion = document.getElementById('duracion');
     var file = fileInput.files[0];
     var fileType = file ? file.type.split('/')[0] : '';
 
@@ -32,6 +33,9 @@ document.getElementById('gm-group-profile-form').addEventListener('submit', func
 
     if (zona === "") {
         errors.push('Seleccione Zona Geográfica.');
+    }
+    if (duracion === "") {
+        errors.push('Seleccione Duración del Show.');
     }
 });
 

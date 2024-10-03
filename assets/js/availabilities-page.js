@@ -3,13 +3,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeModal = document.querySelector('.modal .close');
     const saveChangesButton = document.getElementById('saveAvailabilityChanges');
     const createAvailabilityButton = document.getElementById('createAvailability');
+    const selectGroup = document.getElementById('create_group_id');
     let editingAvailabilityId = null;
 
     document.querySelectorAll('.edit-availability').forEach(button => {
         button.addEventListener('click', function() {
+                       
             editingAvailabilityId = this.dataset.id;
+            
+            console.log(editingAvailabilityId);
+            
+            
             fetchAvailabilityData(editingAvailabilityId);
+            
             editModal.style.display = 'block';
+            
         });
     });
 
@@ -47,6 +55,35 @@ document.addEventListener('DOMContentLoaded', function() {
                     location.reload();
                 } else {
                     alert('Error al actualizar la disponibilidad: ' + response.data);
+                }
+            }
+        );
+    });
+
+    selectGroup.addEventListener('change', function() {
+        const groupId = selectGroup.value;
+        const contendorOptions = document.getElementById('create_zone');
+        contendorOptions.innerHTML = "";
+        console.log(groupId);
+        jQuery.post(
+            ajaxurl,
+            {
+                action: 'gm_extract_zones_per_group',
+                _wpnonce: gm_availability_nonce,
+                group_id: groupId,
+            },
+            function(response) {
+                // console.log(response.data);
+                if (response.success) {
+                    // console.log(response.data);
+                    let template = "<option value='' disabled selected>--Seleccione Zona--</option>";
+                    let data = response.data
+                    data.forEach(element => {                       
+                        template += `<option value="${element.id}">${element.name_zone}</option>`
+                    });
+                    contendorOptions.innerHTML = template;
+                } else {
+                    alert('Error al cargar zonas: ' + response.data);
                 }
             }
         );
@@ -90,10 +127,39 @@ document.addEventListener('DOMContentLoaded', function() {
             function(response) {
                 if (response.success) {
                     const availability = response.data;
+                    console.log(availability);
+                    const zoneEdit = document.getElementById('zone_edit');
+                    zoneEdit.innerHTML = "";
+                    jQuery.post(
+                        ajaxurl,
+                        {
+                            action: 'gm_extract_zones_per_group',
+                            _wpnonce: gm_availability_nonce,
+                            group_id: availability.group_id,
+                        },
+                        function(response) {
+                            // console.log(response.data);
+                            if (response.success) {
+                                let template = "<option value='' disabled>--Seleccione Zona--</option>";
+                                let data = response.data
+                                data.forEach(element => {                       
+                                    template += `<option value="${element.id}">${element.name_zone}</option>`
+                                });
+                                zoneEdit.innerHTML = template;
+                            } else {
+                                alert('Error al cargar zonas: ' + response.data);
+                            }
+                        }
+                    );
                     document.getElementById('edit_availability_id').value = availability.id;
                     document.getElementById('edit_date').value = availability.date.replace(' ', 'T');
                     document.getElementById('edit_end_time').value = availability.end_time.replace(' ', 'T');
                     document.getElementById('edit_all_day').checked = availability.all_day == 1;
+                    console.log(availability.id_zone);
+                    zoneEdit.value = availability.id_zone;
+                    const event = new Event('change', { bubbles: true });
+                    zoneEdit.dispatchEvent(event);
+
                 } else {
                     alert('Error al obtener la disponibilidad: ' + response.data);
                 }
