@@ -10,15 +10,19 @@ $contrataciones = $wpdb->get_results("
         a.contractor_name, 
         a.contractor_email,
         b.date as availability_date, 
-        b.end_time as availability_end_time 
+        b.end_time as availability_end_time,
+        z.name_zone
     FROM {$wpdb->prefix}gm_contracts a 
     INNER JOIN {$wpdb->prefix}gm_availabilities b ON a.availability_id = b.id
     LEFT JOIN {$wpdb->prefix}gm_groups g ON b.group_id = g.id
+    LEFT JOIN {$wpdb->prefix}gm_zones z on b.id_zone = z.id
 ");
 
 $contractors = $wpdb->get_results("SELECT ID, display_name FROM {$wpdb->prefix}users WHERE ID IN (SELECT user_id FROM {$wpdb->prefix}usermeta WHERE meta_key = '{$wpdb->prefix}capabilities' AND meta_value LIKE '%gm_contractor%')");
 
-$musical_groups = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}gm_groups");
+// $musical_groups = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}gm_groups");
+$musical_groups = $wpdb->get_results("SELECT DISTINCT a.id, a.name FROM {$wpdb->prefix}gm_groups a INNER JOIN {$wpdb->prefix}gm_availabilities b ON a.id = b.group_id");       
+
 
 
 ?>
@@ -35,6 +39,7 @@ $musical_groups = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}gm_gro
                         <th>Grupo Musical</th>
                         <th>Contratante</th>
                         <th>Fecha</th>
+                        <th>Zona</th>
                         <th>Hora inicio y fin</th>
                         <th>Acciones</th>
                     </tr>
@@ -46,6 +51,7 @@ $musical_groups = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}gm_gro
                             <td><?php echo esc_html($contratacion->group_name); ?> (<?php echo esc_html($contratacion->group_email); ?>)</td> <!-- Mostrar nombre y correo del grupo -->
                             <td><?php echo esc_html($contratacion->contractor_name); ?> (<?php echo esc_html($contratacion->contractor_email); ?>)</td>
                             <td><?php echo esc_html(date('Y-m-d', strtotime($contratacion->availability_date))); ?></td>
+                            <td><?php echo esc_html($contratacion->name_zone); ?></td>
                             <td><?php echo esc_html(date('H:i', strtotime($contratacion->availability_date))); ?> - <?php echo esc_html(date('H:i', strtotime($contratacion->availability_end_time))); ?></td>
                             <td>
                                 <a href="#" class="delete-contract" data-id="<?php echo esc_attr($contratacion->contract_id); ?>">Eliminar</a>

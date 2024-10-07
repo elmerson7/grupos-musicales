@@ -104,7 +104,7 @@ $musical_groups = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}gm_gro
             <div class="form-group">
                 <label for="zone_edit">Zona Geográfica</label>
                 <select id="zone_edit" required>
-                        <!-- <option value="">--Selecciona Zona--</option> -->
+                        <!-- <option value="" selected disabled>--Selecciona Zona--</option> -->
                 </select>
             </div>
 
@@ -120,7 +120,7 @@ $musical_groups = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}gm_gro
                 <input type="checkbox" id="edit_all_day">
                 <label for="edit_all_day">Todo el día</label>
             </div>
-            <button type="button" id="saveAvailabilityChanges">Guardar Cambios</button>
+            <button type="button" id="saveAvailabilityChanges" style="display:none">Guardar Cambios</button>
         </form>
     </div>
 </div>
