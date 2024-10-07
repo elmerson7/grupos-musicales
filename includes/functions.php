@@ -822,8 +822,10 @@ function gm_handle_contract() {
     if (isset($_POST['availability_id']) && current_user_can('gm_contractor')) {
         global $wpdb;
         $availability_id = intval($_POST['availability_id']);
-        $availability = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gm_availabilities WHERE id = %d", $availability_id));
-        
+        $availability = $wpdb->get_row($wpdb->prepare("
+            SELECT a.*, z.name_zone FROM {$wpdb->prefix}gm_availabilities a 
+            LEFT JOIN {$wpdb->prefix}gm_zones z ON a.id_zone = z.id 
+            WHERE a.id = %d", $availability_id));
         if ($availability) {
             $current_user_id = get_current_user_id();
             $user_info = get_userdata($current_user_id);
@@ -853,6 +855,7 @@ function gm_handle_contract() {
                 $contractor_info_list = '<ul>';
                 $contractor_info_list .= '<li>Nombre: ' . esc_html($user_info->display_name) . '</li>';
                 $contractor_info_list .= '<li>Email: ' . esc_html($user_info->user_email) . '</li>';
+                $contractor_info_list .= '<li>Zona: ' . esc_html($availability->name_zone) . '</li>';
                 // $contractor_info_list .= '<li>Teléfono: ' . esc_html(get_user_meta($user_info->ID, 'phone', true)) . '</li>';
                 $contractor_info_list .= '</ul>';
                 
@@ -861,6 +864,7 @@ function gm_handle_contract() {
                 $group_info_list .= '<li>Nombre del Grupo: ' . esc_html($group['name']) . '</li>';
                 $group_info_list .= '<li>Email del Grupo: ' . esc_html($group['email']) . '</li>';
                 $group_info_list .= '<li>Teléfono del Grupo: ' . esc_html($group['phone']) . '</li>';
+                $group_info_list .= '<li>Zona: ' . esc_html($availability->name_zone) . '</li>';
                 $group_info_list .= '</ul>';
                 
                 // Crear mensaje para el grupo con información del contratista
