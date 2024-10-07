@@ -4,20 +4,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const saveChangesButton = document.getElementById('saveAvailabilityChanges');
     const createAvailabilityButton = document.getElementById('createAvailability');
     const selectGroup = document.getElementById('create_group_id');
+    const form = document.getElementById('edit-availability-form');
     let editingAvailabilityId = null;
 
     document.querySelectorAll('.edit-availability').forEach(button => {
         button.addEventListener('click', function() {
-                       
             editingAvailabilityId = this.dataset.id;
-            
-            console.log(editingAvailabilityId);
-            
-            
             fetchAvailabilityData(editingAvailabilityId);
-            
             editModal.style.display = 'block';
-            
         });
     });
 
@@ -32,13 +26,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     closeModal.addEventListener('click', function() {
         editModal.style.display = 'none';
+        saveChangesButton.style.display = "none";
+        form.reset();
     });
 
     saveChangesButton.addEventListener('click', function() {
         const date = document.getElementById('edit_date').value;
+        const zone = document.getElementById('zone_edit').value;
         const endTime = document.getElementById('edit_end_time').value;
         const allDay = document.getElementById('edit_all_day').checked ? 1 : 0;
-
+        // console.log(zone,date,endTime,allDay);
+        // return
         jQuery.post(
             ajaxurl,
             {
@@ -47,7 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 availability_id: editingAvailabilityId,
                 date: date,
                 end_time: endTime,
-                all_day: allDay
+                all_day: allDay,
+                id_zone: zone
             },
             function(response) {
                 if (response.success) {
@@ -64,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const groupId = selectGroup.value;
         const contendorOptions = document.getElementById('create_zone');
         contendorOptions.innerHTML = "";
-        console.log(groupId);
+        // console.log(groupId);
         jQuery.post(
             ajaxurl,
             {
@@ -117,6 +116,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function fetchAvailabilityData(availabilityId) {
+        const zoneEdit = document.getElementById('zone_edit');
+        zoneEdit.innerHTML = "";+
         jQuery.post(
             ajaxurl,
             {
@@ -127,9 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
             function(response) {
                 if (response.success) {
                     const availability = response.data;
-                    console.log(availability);
-                    const zoneEdit = document.getElementById('zone_edit');
-                    zoneEdit.innerHTML = "";
+                    // console.log(availability);
                     jQuery.post(
                         ajaxurl,
                         {
@@ -142,23 +141,28 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (response.success) {
                                 let template = "<option value='' disabled>--Seleccione Zona--</option>";
                                 let data = response.data
-                                data.forEach(element => {                       
-                                    template += `<option value="${element.id}">${element.name_zone}</option>`
+                                data.forEach(element => {    
+                                    if (element.id === availability.id_zone) {
+                                        template += `<option selected value="${element.id}">${element.name_zone}</option>`
+                                    }else{
+                                        template += `<option value="${element.id}">${element.name_zone}</option>`
+                                    }                   
                                 });
                                 zoneEdit.innerHTML = template;
+                                document.getElementById('edit_availability_id').value = availability.id;
+                                document.getElementById('edit_date').value = availability.date.replace(' ', 'T');
+                                document.getElementById('edit_end_time').value = availability.end_time.replace(' ', 'T');
+                                document.getElementById('edit_all_day').checked = availability.all_day == 1;
+                                saveChangesButton.style.display = "";
                             } else {
                                 alert('Error al cargar zonas: ' + response.data);
                             }
                         }
                     );
-                    document.getElementById('edit_availability_id').value = availability.id;
-                    document.getElementById('edit_date').value = availability.date.replace(' ', 'T');
-                    document.getElementById('edit_end_time').value = availability.end_time.replace(' ', 'T');
-                    document.getElementById('edit_all_day').checked = availability.all_day == 1;
-                    console.log(availability.id_zone);
-                    zoneEdit.value = availability.id_zone;
-                    const event = new Event('change', { bubbles: true });
-                    zoneEdit.dispatchEvent(event);
+                    // console.log(availability.id_zone,zoneEdit.value);
+                    // zoneEdit.value = availability.id_zone;
+                    // const event = new Event('change', { bubbles: true });
+                    // zoneEdit.dispatchEvent(event);
 
                 } else {
                     alert('Error al obtener la disponibilidad: ' + response.data);

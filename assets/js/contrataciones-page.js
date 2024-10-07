@@ -20,7 +20,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 group_id: groupId
             },
             function(response) {
+                // console.log(response.data);
                 if (response.success) {
+                    
                     // Limpiar opciones actuales
                     createAvailabilitySelect.innerHTML = '';
 
@@ -28,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     response.data.forEach(availability => {
                         const option = document.createElement('option');
                         option.value = availability.id;
-                        option.textContent = `${availability.date} - ${availability.end_time}`;
+                        option.textContent = `${availability.name_zone} ::: ${availability.date} - ${availability.end_time}`;
                         createAvailabilitySelect.appendChild(option);
                     });
                 } else {

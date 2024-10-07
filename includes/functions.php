@@ -127,6 +127,7 @@ function gm_availabilities_page_update_availability() {
         global $wpdb;
 
         $availability_id = intval($_POST['availability_id']);
+        $id_zone = intval($_POST['id_zone']);
         $date = sanitize_text_field($_POST['date']);
         $end_time = sanitize_text_field($_POST['end_time']);
         $all_day = isset($_POST['all_day']) ? 1 : 0;
@@ -137,6 +138,7 @@ function gm_availabilities_page_update_availability() {
                 'date' => $date,
                 'end_time' => $end_time,
                 'all_day' => $all_day,
+                'id_zone' => $id_zone,
             ],
             ['id' => $availability_id]
         );
@@ -190,7 +192,7 @@ function gm_get_availabilities_by_group() {
         global $wpdb;
         $group_id = intval($_POST['group_id']);
         
-        $availabilities = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}gm_availabilities WHERE group_id = %d AND contracted = 0", $group_id));
+        $availabilities = $wpdb->get_results($wpdb->prepare("SELECT a.*,b.name_zone FROM {$wpdb->prefix}gm_availabilities a LEFT JOIN {$wpdb->prefix}gm_zones b ON a.id_zone = b.id WHERE group_id = %d AND contracted = 0", $group_id));
 
         wp_send_json_success($availabilities);
     } else {
