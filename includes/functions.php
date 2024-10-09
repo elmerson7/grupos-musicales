@@ -516,11 +516,11 @@ function gm_create_tables() {
             photo varchar(255) DEFAULT '' NOT NULL,
             name varchar(100) NOT NULL,
             description text NOT NULL,
-            id_zone int(11) NOT NULL,
+            id_zone varchar(255) NOT NULL,
             email varchar(100) NOT NULL,
             phone varchar(20) NOT NULL,
-            PRIMARY KEY  (id),
-            FOREIGN KEY (id_zone) REFERENCES {$wpdb->prefix}gm_zones(id) ON DELETE CASCADE
+            duration int(11) NOT NULL,
+            PRIMARY KEY  (id)
         ) $charset_collate;",
 
         "CREATE TABLE {$wpdb->prefix}gm_availabilities (
@@ -530,6 +530,7 @@ function gm_create_tables() {
             end_time datetime NOT NULL,
             all_day boolean NOT NULL,
             contracted boolean NOT NULL DEFAULT 0,
+            id_zone int(11) NOT NULL,
             PRIMARY KEY  (id),
             FOREIGN KEY (group_id) REFERENCES {$wpdb->prefix}gm_groups(id) ON DELETE CASCADE
         ) $charset_collate;",
@@ -550,6 +551,7 @@ function gm_create_tables() {
         "CREATE TABLE {$wpdb->prefix}gm_zones (
             id int(11) NOT NULL AUTO_INCREMENT,
             name_zone varchar(255) NOT NULL,
+            email varchar(255) NOT NULL,
             description_zone text NOT NULL,
             status int(11) NOT NULL,
             PRIMARY KEY  (id)
@@ -823,7 +825,7 @@ function gm_handle_contract() {
         global $wpdb;
         $availability_id = intval($_POST['availability_id']);
         $availability = $wpdb->get_row($wpdb->prepare("
-            SELECT a.*, z.name_zone FROM {$wpdb->prefix}gm_availabilities a 
+            SELECT a.*, z.name_zone, z.email FROM {$wpdb->prefix}gm_availabilities a 
             LEFT JOIN {$wpdb->prefix}gm_zones z ON a.id_zone = z.id 
             WHERE a.id = %d", $availability_id));
         if ($availability) {
@@ -868,7 +870,7 @@ function gm_handle_contract() {
                 $group_info_list .= '</ul>';
                 
                 // Crear mensaje para el grupo con información del contratista
-                $message_for_group = 'Tu disponibilidad ha sido contratada para el ' . esc_html($availability->date) . '.<br>';
+                $message_for_group = 'Tu disponibilidad ha sido contratada en tu zona ' . esc_html($availability->name_zone) . ' para el ' . esc_html($availability->date) . '.<br>';
                 $message_for_group .= 'Información del contratista:<br>' . $contractor_info_list;
                 
                 // Crear mensaje para el contratista con información del grupo
@@ -881,9 +883,19 @@ function gm_handle_contract() {
                 $message_for_admin .= 'Información del grupo:<br>' . $group_info_list;
                 
                 // Enviar correos
+                // Enviar correo al grupo
                 wp_mail($group['email'], 'Nueva Contratación', $message_for_group, ['Content-Type: text/html; charset=UTF-8']);
+                // Enviar correo al contratista
                 wp_mail($user_info->user_email, 'Confirmación de Contratación', $message_for_contractor, ['Content-Type: text/html; charset=UTF-8']);
+                // Enviar correo al administrador
                 wp_mail(get_option('admin_email'), 'Nueva Contratación', $message_for_admin, ['Content-Type: text/html; charset=UTF-8']);
+                // Comprobar si la zona tiene un email y enviar correo
+                if (!empty($availability->email)) {
+                    $message_for_zone = 'Nueva contratación en la zona ' . esc_html($availability->name_zone) . ' para el ' . esc_html($availability->date) . '.<br>';
+                    $message_for_zone .= 'Información del grupo contratado:<br>' . $group_info_list;
+
+                    wp_mail($availability->email, 'Nueva Contratación en tu Zona', $message_for_zone, ['Content-Type: text/html; charset=UTF-8']);
+                }
 
                 wp_send_json_success(['message' => 'Contratación exitosa']);
             } else {

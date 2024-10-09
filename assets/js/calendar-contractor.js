@@ -131,13 +131,21 @@ document.addEventListener('DOMContentLoaded', function() {
         popupContent.innerHTML = ''; 
         
         if (dayAvailabilities.length > 0) {
+            const contractedGroups = {};
+            dayAvailabilities.forEach(availability => {
+                if (availability.contracted == '1') {
+                    contractedGroups[availability.group_id] = true;
+                } else {
+                    contractedGroups[availability.group_id] = false;
+                }
+            });
+
             popupContent.innerHTML = `<h2>Disponibilidades para ${selectedDate.toLocaleDateString()}</h2>`;
             dayAvailabilities.forEach(availability => {
                 let contractButton = '';
                 let deleteContract = '';
-                if (contadorContracted >= 2 && !availability.contractor_name) {
-                    contractButton = ``;
-                }else{
+
+                if (!contractedGroups[availability.group_id] && (contadorContracted < 2 || availability.contractor_name)) {
                     contractButton = `<button class="contract-button" data-availability-id="${availability.id}">Contratar</button>`;
                 }
                 
