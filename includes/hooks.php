@@ -57,12 +57,20 @@ function gm_delete_contract() {
     if ($contract_id > 0) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'gm_contracts';
+        $availabilities_table = $wpdb->prefix . 'gm_availabilities';
 
         // Elimina el contrato de la base de datos
         $deleted = $wpdb->delete($table_name, array('availability_id' => $contract_id), array('%d'));
-        // $deleted = true;
-        
+
         if ($deleted) {
+            $wpdb->update(
+                $availabilities_table,
+                array('contracted' => 0),
+                array('id' => $contract_id),
+                array('%d'),
+                array('%d')
+            );
+
             wp_send_json_success('Contrato eliminado correctamente.');
         } else {
             wp_send_json_error('No se pudo eliminar el contrato. Puede que el contrato no exista.');
