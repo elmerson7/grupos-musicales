@@ -225,8 +225,10 @@ function gm_create_contract() {
 
         // Obtener la fecha de la tabla `qYDj7_gm_availabilities`
         $availability = $wpdb->get_row($wpdb->prepare("SELECT date FROM {$wpdb->prefix}gm_availabilities WHERE id = %d", $availability_id));
+        // wp_send_json_success($wpdb->last_query);
         if (!$availability) {
             wp_send_json_error('Disponibilidad no encontrada.');
+
             return;
         }
 
@@ -828,6 +830,8 @@ function gm_handle_contract() {
             SELECT a.*, z.name_zone, z.email FROM {$wpdb->prefix}gm_availabilities a 
             LEFT JOIN {$wpdb->prefix}gm_zones z ON a.id_zone = z.id 
             WHERE a.id = %d", $availability_id));
+            // wp_send_json_success($wpdb->last_query);
+
         if ($availability) {
             $current_user_id = get_current_user_id();
             $user_info = get_userdata($current_user_id);

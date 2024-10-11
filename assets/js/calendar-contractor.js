@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
             function(response) {
                 if (response.success) {
                     availabilities = response.data;
-                    console.log(availabilities);
+                    // console.log(availabilities);
                     
                     loadCalendar(); // Cargar el calendario con las disponibilidades obtenidas
                 } else {
@@ -132,23 +132,37 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (dayAvailabilities.length > 0) {
             const contractedGroups = {};
+            // let flagBtnContract = false;
             dayAvailabilities.forEach(availability => {
-                if (availability.contracted == '1') {
-                    contractedGroups[availability.group_id] = true;
-                } else {
+                // if (availability.contracted == '1' && availability.contractor_name === wp_current_user_name) {
+
+                if (!(availability.group_id in contractedGroups)) {
                     contractedGroups[availability.group_id] = false;
                 }
+                if (availability.contracted == '1') {
+                    contractedGroups[availability.group_id] = true;
+                    // flagBtnContract = true;
+                } 
+                // else {
+                //     contractedGroups[availability.group_id] = false;
+                // }
             });
+            // console.log(dayAvailabilities);
+            // console.log(contractedGroups);
+            // console.log(wp_current_user_name);
+            
 
             popupContent.innerHTML = `<h2>Disponibilidades para ${selectedDate.toLocaleDateString()}</h2>`;
             dayAvailabilities.forEach(availability => {
+                // console.log(availability.contractor_name == wp_current_user_name);            
                 let contractButton = '';
                 let deleteContract = '';
 
                 if (!contractedGroups[availability.group_id] && (contadorContracted < 2 || availability.contractor_name)) {
+                // if (!flagBtnContract && (contadorContracted < 2 || availability.contractor_name)) {
                     contractButton = `<button class="contract-button" data-availability-id="${availability.id}">Contratar</button>`;
-                }
-                
+                }   
+
                 if (availability.contractor_name && availability.contractor_name === wp_current_user_name) {
                     deleteContract = `<button class="delete-availabilityC" data-contracted-id="${availability.id}"><i class="fas fa-trash-alt"></i></button>`;
                 }
@@ -235,6 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     _wpnonce: gm_ajax.nonce
                 },
                 function(response) {
+                    
                     if (response.success) {
                         alert('Contratación exitosa');
                         location.reload();
@@ -262,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let limitMonth = currentMonth+2;
         let monthArrow = currentDate.getMonth();
         let yearArrow = currentDate.getFullYear();
-        console.log(`currentMonth: ${currentMonth}, monthArrow: ${monthArrow}, limitMonth: ${limitMonth}, currentYear ${yearArrow}, mes actual: ${currentYear}`);
+        // console.log(`currentMonth: ${currentMonth}, monthArrow: ${monthArrow}, limitMonth: ${limitMonth}, currentYear ${yearArrow}, mes actual: ${currentYear}`);
 
         if (limitMonth<12) {
             if (monthArrow >= currentMonth && monthArrow < limitMonth ) {

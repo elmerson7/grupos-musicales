@@ -38,7 +38,6 @@ function gm_contract() {
 
     gm_add_contract($data);
 
-    wp_send_json_success('Contract created successfully');
 }
 
 function gm_delete_contract() {
