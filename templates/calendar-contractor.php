@@ -4,6 +4,10 @@ global $wpdb;
 $gm_contract_nonce = wp_create_nonce('gm_contract_action');
 
 $zones = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gm_zones WHERE status = 1");
+// echo "<pre>";
+// print_r(get_defined_vars());
+// print_r(wp_get_current_user());
+// echo "</pre>";
 
 ?>
 
